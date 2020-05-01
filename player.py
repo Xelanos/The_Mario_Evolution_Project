@@ -28,3 +28,4 @@ class Player:
         if self.farthest_x == 40 and self.farthest_x_time == 400:
             self.fitness = 0
         self.fitness = self.farthest_x + self.farthest_x_time
+        return self.fitness
