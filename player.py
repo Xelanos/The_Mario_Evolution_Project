@@ -1,15 +1,20 @@
+import os
+
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+
 import tensorflow as tf
 import numpy as np
 
 
+
 class Player:
 
-    def __init__(self, model):
-        self.model = model
+    def __init__(self, number_of_actions, weights=None):
+        self.model = self._make_model(number_of_actions, weights)
         self.fitness = 0
         self.farthest_x = 0
         self.farthest_x_time = 400
-        self.breeding_probability = 0
 
 
     def act(self, state):
@@ -25,7 +30,21 @@ class Player:
             self.farthest_x_time = info['time']
 
     def calculate_fittness(self):
-        if self.farthest_x == 40 and self.farthest_x_time == 400:
-            self.fitness = 0
-        self.fitness = self.farthest_x + self.farthest_x_time
+        if self.farthest_x == 40:
+            self.fitness = 1
+        self.fitness = self.farthest_x
         return self.fitness
+
+    def _make_model(self, number_of_actions, weights):
+        model = tf.keras.Sequential([
+                tf.keras.layers.Flatten(input_shape=(240, 256, 1)),
+                tf.keras.layers.Dense(80, activation=tf.nn.relu, name='hidden',
+                                      kernel_initializer=tf.keras.initializers.RandomNormal(stddev=3)),
+                tf.keras.layers.Dense(number_of_actions, activation=tf.nn.softmax, use_bias=False)
+            ])
+        if weights is not None:
+            model.get_layer('hidden').set_weights([weights, np.zeros((80,))])
+        return model
+
+    def get_weights(self):
+        return self.model.get_layer('hidden').get_weights()
