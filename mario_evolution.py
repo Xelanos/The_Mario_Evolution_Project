@@ -126,7 +126,6 @@ class GeneticMario:
 
         return [child_kernel, child_bias]
 
-
     def _save(self):
         for i, player in enumerate(self.poplation):
             os.mkdir(f'saved/model{i}')
