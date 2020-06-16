@@ -3,7 +3,7 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT, COMPLEX_MOVEMENT, RIGH
 
 from mario_evolution import GeneticMario
 
-INITIAL_POP = 21
+INITIAL_POP = 16
 GENERATIONS = 201
 
 actions = SIMPLE_MOVEMENT
