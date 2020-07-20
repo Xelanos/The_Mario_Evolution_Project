@@ -25,6 +25,7 @@ class PopulationManger():
     def __init__(self, population_size):
         self.population = []
         self.size = population_size
+        self.gen_number = 0
 
     def __iter__(self):
         return self.population.__iter__()
@@ -60,8 +61,8 @@ class MarioBasicPopulationManger(PopulationManger):
     def __init__(self, population_size):
         super().__init__(population_size)
         self.cross_prob = 0.5
-        self.mutation_rate = 0.15
-        self.mutation_power = 0.06
+        self.mutation_rate = 0.40
+        self.mutation_power = 0.70
 
 
     def update_breeding_probability(self):
@@ -70,6 +71,8 @@ class MarioBasicPopulationManger(PopulationManger):
             fitness_sum += member.fitness_core
         for member in self.population:
             member.mating_probabilty = member.fitness_core / fitness_sum
+
+        print(f'average fitness this generation : {fitness_sum/ self.size}')
 
     def pick_from_population(self):
         i = 0
@@ -81,11 +84,16 @@ class MarioBasicPopulationManger(PopulationManger):
         return self.population[i - 1]
 
     def make_next_generation(self):
+        self.gen_number += 1
         new_gen = MarioBasicPopulationManger(self.size)
         new_gen.add_member(self.find_elite())
         self.update_breeding_probability()
         for _ in range(self.size - 1):
-            new_gen.add_member(self.breed(self.pick_from_population(), self.pick_from_population()))
+            parent1 = self.pick_from_population()
+            parent2 = self.pick_from_population()
+            while parent1 == parent2:
+                parent2 = self.pick_from_population()
+            new_gen.add_member(self.breed(parent1, parent2))
         return new_gen
 
     def find_elite(self):

@@ -1,4 +1,4 @@
-from player import Player
+from player import MarioPlayer
 from population_manger import *
 
 import gym.wrappers.monitor as monitor
@@ -13,8 +13,7 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from multiprocessing import Pool, cpu_count
 
-TIME_SCALE = 2000
-
+TIME_SCALE = 1500
 
 class GeneticMario:
 
@@ -29,13 +28,12 @@ class GeneticMario:
         self._init_pop()
 
 
-    def run(self, render=True):
+    def run(self, render_every=100):
         try:
             for gen in range(self.generations):
                 self.generation = gen
                 print(f'Staring generation {gen + 1}')
-                if gen % 7 == 0:
-                    render = True
+                self.render = (gen % render_every == 0)
                 pool = Pool(8)
                 members = pool.map_async(self.run_player, self.population).get()
                 pool.close()
@@ -44,6 +42,7 @@ class GeneticMario:
                     self.population.add_member(member)
                 self.population = self.population.make_next_generation()
                 gc.collect()
+            self._save()
         except Exception as e:
             self._save()
             traceback.print_exc(e)
@@ -52,7 +51,7 @@ class GeneticMario:
     def run_player(self, member, record=False, render=True):
         env = gym_super_mario_bros.make('SuperMarioBros-v0')
         env = JoypadSpace(env, self.actions)
-        player = Player(self.num_of_actions, member.genes)
+        player = MarioPlayer(self.num_of_actions, member.genes)
 
         if record:
             rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/gen.mp4")
@@ -71,7 +70,7 @@ class GeneticMario:
             player.reward += reward
             if info['life'] < 2: # will repeat death, so why try more
                 done = True
-            if render:
+            if self.render:
                 env.render()
         if record:
             rec.close()
@@ -95,7 +94,7 @@ class GeneticMario:
 
 
     def _init_population_player(self, i):
-        p = Player(self.num_of_actions)
+        p = MarioPlayer(self.num_of_actions)
         return p.get_weights()
 
 
