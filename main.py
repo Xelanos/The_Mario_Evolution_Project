@@ -16,4 +16,4 @@ if __name__ == '__main__':
 
 
     g = GeneticMario(actions, GENERATIONS, INITIAL_POP)
-    g.run(render_every=10)
+    g.run(render_every=0)

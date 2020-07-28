@@ -33,8 +33,11 @@ class GeneticMario:
             for gen in range(self.generations):
                 self.generation = gen
                 print(f'Staring generation {gen + 1}')
-                self.render = (gen % render_every == 0)
-                pool = Pool(8)
+                if render_every:
+                    self.render = (gen % render_every == 0)
+                else:
+                    self.render = False
+                pool = Pool()
                 members = pool.map_async(self.run_player, self.population).get()
                 pool.close()
                 pool.join()
@@ -119,6 +122,8 @@ class GeneticMario:
         return [child_kernel, child_bias]
 
     def _save(self):
+        if not os.path.isdir("saved"):
+            os.mkdir("saved")
 
         with open("saved/saved_gen.pic", 'wb') as f:
             pickle.dump(self.generation, f)
