@@ -1,42 +1,43 @@
-from player import MarioPlayer
+import gc
+import pickle
+import traceback
+from multiprocessing import Pool
+
+import gym
+gym.logger.set_level(40)
+from gym.wrappers import monitor
+
+from player import BipedalPlayer
 from population_manger import *
 
-import gym.wrappers.monitor as monitor
 
-import traceback
-import pickle
+class GeneticBipedal:
 
-import os
-import gc
-
-import gym_super_mario_bros
-from nes_py.wrappers import JoypadSpace
-from multiprocessing import Pool, cpu_count
-
-TIME_SCALE = 200
-
-class GeneticMario:
-
-    def __init__(self, actions, generations, initial_pop):
-        self.actions = actions
-        self.num_of_actions = len(actions)
+    def __init__(self, generations, initial_pop, time_scale):
         self.generations = generations
         self.inital_pop = initial_pop
         self.population = MarioBasicPopulationManger(self.inital_pop)
         self.elite = None
         self.generation = 0
+        self.time_scale = time_scale
         self._init_pop()
 
+    def _init_pop(self):
+        weights = Pool(processes=1).map(self._init_population_player, range(self.inital_pop))
+        for w in weights:
+            self.population.add_member(Member(w, 0))
+
+    def _init_population_player(self, i):
+        p = BipedalPlayer()
+        return p.get_weights()
 
     def run(self, render_every=100):
         try:
             for gen in range(self.generations):
                 self.generation = gen
                 print(f'Staring generation {gen + 1}')
-                if render_every:
-                    self.render = (gen % render_every == 0)
-                else:
-                    self.render = False
+                self.render = (gen % render_every == 0)
+                if gen == 0: self.render = False
                 pool = Pool()
                 members = pool.map_async(self.run_player, self.population).get()
                 pool.close()
@@ -44,35 +45,32 @@ class GeneticMario:
                 for member in members:
                     self.population.add_member(member)
                 self.population = self.population.make_next_generation()
+                print('Generation Done\n')
                 gc.collect()
             self._save()
         except Exception as e:
             self._save()
-            traceback.print_exc(e)
+            traceback.print_exc(e.__str__())
             return
 
     def run_player(self, member, record=False, render=True):
-        env = gym_super_mario_bros.make('SuperMarioBros-v0')
-        env = JoypadSpace(env, self.actions)
-        player = MarioPlayer(self.num_of_actions, member.genes)
+        env = gym.make('BipedalWalkerHardcore-v3')
+        player = BipedalPlayer(member.genes)
 
         if record:
             rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/gen.mp4")
         env.reset()
         done = False
-        action = 0
+        action = [0, 0, 0, 0]
 
-        for step in range(TIME_SCALE):
+        for step in range(self.time_scale):
             if done:
                 break
             state, reward, done, info = env.step(action)
             if record:
                 rec.capture_frame()
             action = player.act(state)
-            player.update_info(info)
             player.reward += reward
-            if info['life'] < 2: # will repeat death, so why try more
-                done = True
             if self.render:
                 env.render()
         if record:
@@ -80,34 +78,10 @@ class GeneticMario:
         env.close()
         return Member(player.get_weights(), player.calculate_fittness())
 
-
-
-    def update_fitness_and_find_elite(self):
-        best_fit = 0
-        for player in self.poplation:
-            fit = player.calculate_fittness()
-            if fit > best_fit:
-                self.elite = player
-
-
-    def _init_pop(self):
-        weights = Pool(processes=1).map(self._init_population_player, range(self.inital_pop))
-        for w in weights:
-            self.population.add_member(Member(w, 0))
-
-
-    def _init_population_player(self, i):
-        p = MarioPlayer(self.num_of_actions)
-        return p.get_weights()
-
     def _save(self):
-        if not os.path.isdir("saved"):
-            os.mkdir("saved")
 
         with open("saved/saved_gen.pic", 'wb') as f:
             pickle.dump(self.generation, f)
 
-
         with open("saved/saved_pop.pic", 'wb') as f:
             pickle.dump(self.population, f)
-
