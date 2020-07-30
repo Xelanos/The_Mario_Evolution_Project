@@ -57,6 +57,8 @@ class GeneticMario:
         player = MarioPlayer(self.num_of_actions, member.genes)
 
         if record:
+            if not os.path.isdir("vid"):
+                os.mkdir("vid")
             rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/gen.mp4")
         env.reset()
         done = False
