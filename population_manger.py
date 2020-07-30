@@ -93,6 +93,7 @@ class MarioBasicPopulationManger(PopulationManger):
     def find_elite(self):
         return sorted(self.population, key=lambda member: member.fitness_score, reverse=True)[0]
 
+
     def breed(self, first_member, second_member):
         new_weights = []
         cross_prob = 0.5

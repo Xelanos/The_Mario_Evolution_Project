@@ -81,15 +81,6 @@ class GeneticMario:
         return Member(player.get_weights(), player.calculate_fittness())
 
 
-
-    def update_fitness_and_find_elite(self):
-        best_fit = 0
-        for player in self.poplation:
-            fit = player.calculate_fittness()
-            if fit > best_fit:
-                self.elite = player
-
-
     def _init_pop(self):
         weights = Pool(processes=1).map(self._init_population_player, range(self.inital_pop))
         for w in weights:
@@ -106,7 +97,6 @@ class GeneticMario:
 
         with open("saved/saved_gen.pic", 'wb') as f:
             pickle.dump(self.generation, f)
-
 
         with open("saved/saved_pop.pic", 'wb') as f:
             pickle.dump(self.population, f)
