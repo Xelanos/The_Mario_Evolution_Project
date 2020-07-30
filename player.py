@@ -94,3 +94,9 @@ class BipedalPlayer:
 
     def get_weights(self):
         return self.model.get_weights()
+
+
+class HumanPlayer(object):
+
+    def act(self, state=None):
+        return None
