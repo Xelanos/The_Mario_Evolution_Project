@@ -4,7 +4,9 @@ The goal of this method is to compare human player to AI agent.
 code taken from https://github.com/Kautenja/nes-py/blob/master/nes_py/app/play_human.py
 """
 
+import os
 import gym
+import gym.wrappers.monitor as monitor
 import nes_py
 from pyglet.window import key
 import gym_super_mario_bros
@@ -28,7 +30,7 @@ BUTTONS = np.array([
             key.X,  # A
         ])
 
-TIME_PER_GAME = 1500
+TIME_PER_GAME = 1600
 # the sentinel value for "No Operation"
 _NOP = 0
 
@@ -53,7 +55,7 @@ def get_keys_to_action(buttons):
     return keys_to_action
 
 
-def run(env: nes_py.NESEnv, buttons=BUTTONS):
+def run(env: nes_py.NESEnv, buttons=BUTTONS, record=False):
     # ensure the observation space is a box of pixels
     assert isinstance(env.observation_space, gym.spaces.box.Box)
     # ensure the observation space is either B&W pixels or RGB Pixels
@@ -74,12 +76,21 @@ def run(env: nes_py.NESEnv, buttons=BUTTONS):
     # create a done flag for the environment
     done = False
     state = env.reset()
+    # record if necessary
+    if record:
+        if not os.path.isdir("vid"):
+            os.mkdir("vid")
+        rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/human_play.mp4")
+    # number of steps for the game
+    num_of_steps = 0
     # prepare frame rate limiting
     target_frame_duration = 1 / env.metadata['video.frames_per_second']
     last_frame_time = 0
     # start the main game loop
     try:
-        while not done:
+        while not done and not viewer.is_escape_pressed:
+            if record:
+                rec.capture_frame()
             current_frame_time = time.time()
             # limit frame rate
             if last_frame_time + target_frame_duration > current_frame_time:
@@ -92,16 +103,18 @@ def run(env: nes_py.NESEnv, buttons=BUTTONS):
             # unwrap the action based on pressed relevant keys
             action = keys_to_action.get(viewer.pressed_keys, _NOP)
             next_state, reward, done, info = env.step(action)
-            # reset if the environment is done
+            num_of_steps += 1
+            # end the game if times is up
+            if num_of_steps > TIME_PER_GAME:
+                done = True
+                print("Time is up!")
+            # show the environment if not done
             if not done:
                 viewer.show(env.unwrapped.screen)
             state = next_state
-            # shutdown if the escape key is pressed
-            if viewer.is_escape_pressed:
-                break
+        print("done in {} steps.".format(num_of_steps))
     except KeyboardInterrupt:
         pass
-
     viewer.close()
     env.close()
 
