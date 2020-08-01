@@ -94,3 +94,4 @@ class BipedalPlayer:
 
     def get_weights(self):
         return self.model.get_weights()
+
