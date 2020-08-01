@@ -15,7 +15,6 @@ import itertools
 import time
 from pyglet import clock
 from nes_py._image_viewer import ImageViewer
-from player import HumanPlayer
 
 # keyboard keys in an array ordered by their byte order in the bitmap
 # i.e. right = 7, left = 6, ..., B = 1, A = 0
@@ -30,7 +29,7 @@ BUTTONS = np.array([
             key.X,  # A
         ])
 
-TIME_PER_GAME = 1600
+TIME_PER_GAME = 2000
 # the sentinel value for "No Operation"
 _NOP = 0
 
@@ -104,6 +103,9 @@ def run(env: nes_py.NESEnv, buttons=BUTTONS, record=False):
             action = keys_to_action.get(viewer.pressed_keys, _NOP)
             next_state, reward, done, info = env.step(action)
             num_of_steps += 1
+            if info['flag_get']:
+                done = True
+                print("Got the flag!")
             # end the game if times is up
             if num_of_steps > TIME_PER_GAME:
                 done = True

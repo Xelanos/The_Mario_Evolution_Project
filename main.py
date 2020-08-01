@@ -4,7 +4,7 @@ from mario_evolution import GeneticMario
 
 INITIAL_POP = 150
 GENERATIONS = 201
-TIME_SCALE = 1600
+TIME_SCALE = 2000
 
 
 
