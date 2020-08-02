@@ -56,7 +56,7 @@ def get_keys_to_action(buttons):
 
 
 def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_limit: int = NO_ADVANCE_STEP_LIMIT,
-        buttons=BUTTONS, record=False):
+        buttons=BUTTONS, allow_dying=True, record=""):
     # ensure the observation space is a box of pixels
     assert isinstance(env.observation_space, gym.spaces.box.Box)
     # ensure the observation space is either B&W pixels or RGB Pixels
@@ -82,9 +82,8 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
     reward_sum = 0
     # record if necessary
     if record:
-        if not os.path.isdir("vid"):
-            os.mkdir("vid")
-        rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/human_play.mp4")
+        assert not os.path.isdir(os.path.dirname(record))
+        rec = monitor.video_recorder.VideoRecorder(env, path=record)
     # number of steps for the game
     num_of_steps = 0
     # prepare frame rate limiting
