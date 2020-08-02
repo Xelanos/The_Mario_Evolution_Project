@@ -29,7 +29,8 @@ BUTTONS = np.array([
             key.X,  # A
         ])
 
-TIME_PER_GAME = 2000
+NO_ADVANCE_STEP_LIMIT = 100
+MAX_STEPS_PER_GAME = 2000
 # the sentinel value for "No Operation"
 _NOP = 0
 
@@ -54,7 +55,8 @@ def get_keys_to_action(buttons):
     return keys_to_action
 
 
-def run(env: nes_py.NESEnv, buttons=BUTTONS, record=False):
+def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_limit: int = NO_ADVANCE_STEP_LIMIT,
+        buttons=BUTTONS, record=False):
     # ensure the observation space is a box of pixels
     assert isinstance(env.observation_space, gym.spaces.box.Box)
     # ensure the observation space is either B&W pixels or RGB Pixels
@@ -75,6 +77,9 @@ def run(env: nes_py.NESEnv, buttons=BUTTONS, record=False):
     # create a done flag for the environment
     done = False
     state = env.reset()
+    last_x_pos = 0
+    same_x_pos_cunt = 0
+    reward_sum = 0
     # record if necessary
     if record:
         if not os.path.isdir("vid"):
@@ -103,22 +108,36 @@ def run(env: nes_py.NESEnv, buttons=BUTTONS, record=False):
             action = keys_to_action.get(viewer.pressed_keys, _NOP)
             next_state, reward, done, info = env.step(action)
             num_of_steps += 1
+            reward_sum += reward
+            if last_x_pos == info['x_pos']:
+                same_x_pos_cunt += 1
+            else:
+                same_x_pos_cunt = 0
+                last_x_pos = info['x_pos']
+            # end the game if player don't advance:
+            if same_x_pos_cunt > standing_steps_limit:
+                done = True
+                print("player not advancing for {} frames. Ending the game.".format(same_x_pos_cunt))
+            # end the game if got to the flag.
             if info['flag_get']:
                 done = True
                 print("Got the flag!")
             # end the game if times is up
-            if num_of_steps > TIME_PER_GAME:
+            if num_of_steps > max_steps:
                 done = True
                 print("Time is up!")
             # show the environment if not done
             if not done:
                 viewer.show(env.unwrapped.screen)
             state = next_state
-        print("done in {} steps.".format(num_of_steps))
+        avg_reward = reward_sum / num_of_steps
+        print("Done in {} steps. Average reward {}.".format(num_of_steps, avg_reward))
     except KeyboardInterrupt:
+        print("Trail stopped by KeyboardInterrupt.")
         pass
     viewer.close()
     env.close()
+
 
 if __name__ == "__main__":
     run(gym_super_mario_bros.make('SuperMarioBros-v0'))
