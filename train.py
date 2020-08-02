@@ -66,7 +66,7 @@ if __name__ == "__main__":
         outcomes = []
         for trial in range(args.num_of_trials):
             print("Stating human trial {}:".format(trial))
-            if RECORDE_OPTIONS[2] or (RECORDE_OPTIONS[1] and trial % args.record_frequency == 0):
+            if args.record == RECORDE_OPTIONS[2] or (args.record == RECORDE_OPTIONS[1] and trial % args.record_frequency == 0):
                 current_record_path = os.path.join(vids_path, "human_record_trial_{}.mp4".format(trial))
             else:
                 current_record_path = ""
