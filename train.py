@@ -35,7 +35,7 @@ def parse_arguments():
     parser.add_argument("-no_action_limit", "-no_advance_limit", "-standing_limit", "-no_progress_limit",
                         dest='standing_steps_limit', default=DEFAULT_NO_ADVANCE_STEP_LIMIT, help="Limit the number of"
                         " steps the agent allow not to change the x position.")
-    parser.add_argument("-d", "-allow_death", "-allow_dying", dest="allow_dying", action='store_false',
+    parser.add_argument("-d", "-allow_death", "-allow_dying", dest="allow_dying", action='store_true', default=False,
                         help="Allow agent to die in a trail.")
     parser.add_argument("-e", "-env", dest="env", default=DEFAULT_ENVIRONMENT, help="The environment ID to play")
     parser.add_argument("-r", "-record", dest="record", choices=RECORDE_OPTIONS, default=RECORDE_OPTIONS[0],
