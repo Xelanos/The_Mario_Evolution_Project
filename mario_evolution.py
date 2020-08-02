@@ -20,18 +20,21 @@ NO_ADVANCE_STEP_LIMIT = 100
 
 class GeneticMario:
 
-    def __init__(self, actions, generations, initial_pop, steps_scale=TIME_SCALE, allow_death=False,
-                 standing_steps_limit = NO_ADVANCE_STEP_LIMIT):
+    def __init__(self, mario_environment, actions, generations, initial_pop, steps_scale=TIME_SCALE, allow_death=False,
+                 standing_steps_limit=NO_ADVANCE_STEP_LIMIT, output_dir="", record=False):
         self.actions = actions
         self.num_of_actions = len(actions)
         self.generations = generations
-        self.inital_pop = initial_pop
-        self.population = MarioBasicPopulationManger(self.inital_pop)
+        self.initial_pop = initial_pop
+        self.population = MarioBasicPopulationManger(self.initial_pop)
         self.elite = None
         self.generation = 0
         self.steps_scale = steps_scale
         self.allow_death = allow_death
         self.standing_steps_limit = standing_steps_limit
+        self.output_dir = output_dir
+        self.record = record
+        self.env = mario_environment
         self._init_pop()
 
     def run(self, render_every=100):
@@ -58,7 +61,7 @@ class GeneticMario:
             return
 
     def run_player(self, member, record=False, render=True):
-        env = gym_super_mario_bros.make('SuperMarioBros-v0')
+        env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
         player = MarioPlayer(self.num_of_actions, member.genes)
 
@@ -102,7 +105,7 @@ class GeneticMario:
 
 
     def _init_pop(self):
-        weights = Pool(processes=1).map(self._init_population_player, range(self.inital_pop))
+        weights = Pool(processes=1).map(self._init_population_player, range(self.initial_pop))
         for w in weights:
             self.population.add_member(Member(w, 0))
 

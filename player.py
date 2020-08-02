@@ -16,6 +16,7 @@ class MarioPlayer:
         self.fitness = 0
         self.farthest_x = 0
         self.farthest_x_time = 400
+        self.steps_count = 0
         self.reward = 0
 
 
@@ -31,7 +32,7 @@ class MarioPlayer:
             self.farthest_x = info['x_pos']
             self.farthest_x_time = info['time']
         self.score = info['score']
-        self.did_win = info['flag_get']
+        self.did_win = info['flag_get'] if info['flag_get'] else self.did_win
 
     def calculate_fittness(self):
         # self.fitness = self.reward
