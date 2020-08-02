@@ -29,7 +29,7 @@ def parse_arguments():
     parser.add_argument("-initial_population", "-i_p", dest="initial_population", type=int, default=INITIAL_POP,
                         help="The size of initial population for genetic agent.")
     parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
-                        help="The maximal frames to a trail.")
+                        help="The maximal frames for a trial.")
     parser.add_argument("-a", "-action_set", dest="action_set", choices=ACTION_SET.keys(), default=DEFAULT_ACTION_SET,
                         help="The set of action the agent can use. Isn't relevant for human agent.")
     parser.add_argument("-no_action_limit", "-no_advance_limit", "-standing_limit", "-no_progress_limit",
@@ -67,6 +67,27 @@ def parse_arguments():
     return args
 
 
+def write_summary(args, output_data_frame: DataFrame):
+    with open(os.path.join(args.output_dir, "summary.txt"), 'w') as summary_file:
+        summary_file.write("Summary for training {agent} agent on {env}".format(agent=args.agent, env=args.env))
+        if args.agent != "human":
+            summary_file.write(" with {action_set} action set".format(action_set=args.action_set))
+        summary_file.write(".\n")
+        summary_file.write("Ran for {num_of_loops} {g_or_t} with at most {steps_limit} steps per game.\n".format(
+            num_of_loops=args.loop_times, g_or_t="generations" if args.agent == "genetic" else "trials",
+            steps_limit=args.steps_limit))
+        summary_file.write("Limit on no changing the x position is: {standing_limit}\n"
+                           "{allow_dying} allow player to die.\n".format(standing_limit=args.standing_steps_limit,
+                                                                allow_dying="Didn't" if args.allow_dying else "Did"))
+        if args.agent == "genetic":
+            summary_file.write("Initial population is: {i_p}\n".format(i_p=args.inital_poplation))
+        if any(output_data_frame['finish_level']):
+            summary_file.write("Agent successfully win the level in some games.\n")
+        else:
+            summary_file.write("Agent failed to win any games.\n")
+        # add best result
+
+
 if __name__ == "__main__":
     args = parse_arguments()
     if args.record != RECORDE_OPTIONS[0]:
@@ -90,7 +111,7 @@ if __name__ == "__main__":
                                         record=current_record_path)
             outcomes.append(outcome)
         df = DataFrame(outcomes)
-        df.to_csv(os.path.join(args.output_dir, "summary.csv"))
+        df.to_csv(os.path.join(args.output_dir, "output.csv"))
     elif args.agent == "genetic":
         model = GeneticMario(actions=ACTION_SET[args.action_set],
                              generations=args.loop_times,
