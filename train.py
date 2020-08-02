@@ -85,7 +85,16 @@ def write_summary(args, output_data_frame: DataFrame):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
             summary_file.write("Agent failed to win any games.\n")
-        # add best result
+        if args.agent == "human":
+            best_result_index = df['performance_score'].idxmax()
+            info = df.iloc[best_result_index]
+            summary_file.write("Best performance: trial number {best_index} with performance score of"
+                               " {performance_score}. ".format(best_index = best_result_index + 1,
+                                                               performance_score=info['performance_score']))
+            if info['finish_level']:
+                summary_file.write("Finish level with size {size}. ".format(size=info['finish_status']))
+            summary_file.write("Finish in {steps} steps and {deaths} deaths. Score {score} and {coins} coins.\n".format(
+                steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
 
 
 if __name__ == "__main__":
@@ -112,6 +121,7 @@ if __name__ == "__main__":
             outcomes.append(outcome)
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(args.output_dir, "output.csv"))
+        write_summary(args, df)
     elif args.agent == "genetic":
         model = GeneticMario(actions=ACTION_SET[args.action_set],
                              generations=args.loop_times,

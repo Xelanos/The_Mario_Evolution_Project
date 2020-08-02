@@ -34,10 +34,11 @@ class MarioPlayer:
         self.score = info['score']
         self.did_win = info['flag_get'] if info['flag_get'] else self.did_win
 
-    def calculate_fittness(self):
+    def calculate_fitness(self, values_weights=np.array([10, 1, 10000])):
         # self.fitness = self.reward
         # return self.reward
-        return 10 * self.reward + self.score + 10000 * self.did_win
+        values = np.array([self.reward, self.score, 1 if self.did_win else 0])
+        return sum(values*values_weights)
 
     def _make_model(self, number_of_actions, weights):
         model = tf.keras.Sequential([

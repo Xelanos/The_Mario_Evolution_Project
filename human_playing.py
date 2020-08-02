@@ -35,6 +35,11 @@ MAX_STEPS_PER_GAME = 2000
 _NOP = 0
 # number of initial life
 INITIAL_LIFE = 2
+# weights to values to calculate performance score.
+VALUES_WEIGHTS = np.array([10,  # avg_reward
+                           1,  # score
+                           10000  # did_win
+                           ])
 
 def get_keys_to_action(buttons):
     """
@@ -57,7 +62,7 @@ def get_keys_to_action(buttons):
 
 
 def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_limit: int = NO_ADVANCE_STEP_LIMIT,
-        buttons=BUTTONS, allow_dying=True, record=""):
+        buttons=BUTTONS, values_weights=VALUES_WEIGHTS, allow_dying=True, record=""):
     # ensure the observation space is a box of pixels
     assert isinstance(env.observation_space, gym.spaces.box.Box)
     # ensure the observation space is either B&W pixels or RGB Pixels
@@ -137,9 +142,10 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
         if info:
             avg_reward = reward_sum / num_of_steps
             info['life'] = -1 if info['life'] == 255 else info['life']
+            values = np.array[avg_reward, info['score'], 1 if info["flag_get"] else 0]
             outcome = {'avg_reward': avg_reward, 'steps': num_of_steps, 'score': info['score'],
                        'deaths': INITIAL_LIFE - info['life'], 'coins': info['coins'], 'finish_status': info['status'],
-                       'finish_level': info["flag_get"]}
+                       'finish_level': info["flag_get"], 'performance_score': sum(values*values_weights)}
             print("Done in {} steps. Average reward {}. {} to the flag.".format(num_of_steps, avg_reward,
                                                                         "Got" if info["flag_get"] else "Didn't got"))
 

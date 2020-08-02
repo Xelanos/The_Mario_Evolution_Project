@@ -101,7 +101,7 @@ class GeneticMario:
         if record:
             rec.close()
         env.close()
-        return Member(player.get_weights(), player.calculate_fittness())
+        return Member(player.get_weights(), player.calculate_fitness())
 
 
     def _init_pop(self):
