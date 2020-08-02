@@ -63,7 +63,9 @@ if __name__ == "__main__":
     else:
         vids_path = ""
     if args.agent == "human":
+        outcomes = []
         for trial in range(args.num_of_trials):
+            print("Stating human trial {}:".format(trial))
             if RECORDE_OPTIONS[2] or (RECORDE_OPTIONS[1] and trial % args.record_frequency == 0):
                 current_record_path = os.path.join(vids_path, "human_record_trial_{}.mp4".format(trial))
             else:
@@ -73,5 +75,7 @@ if __name__ == "__main__":
                                         standing_steps_limit=args.standing_steps_limit,
                                         allow_dying=args.allow_dying,
                                         record=current_record_path)
-            #output_data[trial] = outcome
+            outcomes.append(outcome)
+        df = DataFrame(outcomes)
+        df.to_csv(os.path.join(args.output_dir, "summary.csv"))
 

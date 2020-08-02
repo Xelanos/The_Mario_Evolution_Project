@@ -14,6 +14,7 @@ from nes_py.wrappers import JoypadSpace
 from multiprocessing import Pool, cpu_count
 
 TIME_SCALE = 200
+INITIAL_LIFE = 2
 
 class GeneticMario:
 
@@ -73,7 +74,7 @@ class GeneticMario:
             action = player.act(state)
             player.update_info(info)
             player.reward += reward
-            if info['life'] < 2: # will repeat death, so why try more
+            if info['life'] < INITIAL_LIFE: # will repeat death, so why try more
                 done = True
             if self.render:
                 env.render()

@@ -33,7 +33,8 @@ NO_ADVANCE_STEP_LIMIT = 100
 MAX_STEPS_PER_GAME = 2000
 # the sentinel value for "No Operation"
 _NOP = 0
-
+# number of initial life
+INITIAL_LIFE = 2
 
 def get_keys_to_action(buttons):
     """
@@ -80,6 +81,9 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
     last_x_pos = 0
     same_x_pos_cunt = 0
     reward_sum = 0
+    deaths = 0
+    info = dict()
+    outcome = dict()
     # record if necessary
     if record:
         assert not os.path.isdir(os.path.dirname(record))
@@ -117,25 +121,36 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
             if same_x_pos_cunt > standing_steps_limit:
                 done = True
                 print("player not advancing for {} frames. Ending the game.".format(same_x_pos_cunt))
+            # end the game if dying is not allowed and player died
+            if not allow_dying and info['life'] < INITIAL_LIFE:
+                done = True
             # end the game if got to the flag.
             if info['flag_get']:
                 done = True
-                print("Got the flag!")
             # end the game if times is up
             if num_of_steps > max_steps:
                 done = True
-                print("Time is up!")
             # show the environment if not done
             if not done:
                 viewer.show(env.unwrapped.screen)
             state = next_state
-        avg_reward = reward_sum / num_of_steps
-        print("Done in {} steps. Average reward {}.".format(num_of_steps, avg_reward))
+        if info:
+            avg_reward = reward_sum / num_of_steps
+            info['life'] = -1 if info['life'] == 255 else info['life']
+            outcome = {'avg_reward': avg_reward, 'steps': num_of_steps, 'score': info['score'],
+                       'deaths': INITIAL_LIFE - info['life'], 'coins': info['coins'], 'finish_status': info['status'],
+                       'finish_level': info["flag_get"]}
+            print("Done in {} steps. Average reward {}. {} to the flag.".format(num_of_steps, avg_reward,
+                                                                        "Got" if info["flag_get"] else "Didn't got"))
+
     except KeyboardInterrupt:
         print("Trail stopped by KeyboardInterrupt.")
-        pass
+
+    if record:
+        rec.close()
     viewer.close()
     env.close()
+    return outcome
 
 
 if __name__ == "__main__":
