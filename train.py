@@ -20,7 +20,7 @@ def parse_arguments():
                         help="Chose kind of agent for training.")
     parser.add_argument("-o", "-output_dir", dest="output_dir", default="", help="Path for the output data.")
     parser.add_argument("-n", "-num_of_trials", dest='num_of_trials', type=int, default=TRIALS, help="Number of trials.")
-    parser.add_argument("-s", '-time_scale', "-steps_limit", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
+    parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
                         help="The maximal frames to a trail.")
     parser.add_argument("-no_action_limit", "-no_advance_limit", "-standing_limit", "-no_progress_limit",
                         dest='standing_steps_limit', default=DEFAULT_NO_ADVANCE_STEP_LIMIT, help="Limit the number of"

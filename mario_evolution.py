@@ -15,10 +15,13 @@ from multiprocessing import Pool, cpu_count
 
 TIME_SCALE = 200
 INITIAL_LIFE = 2
+NO_ADVANCE_STEP_LIMIT = 100
+
 
 class GeneticMario:
 
-    def __init__(self, actions, generations, initial_pop):
+    def __init__(self, actions, generations, initial_pop, steps_scale=TIME_SCALE, allow_death=False,
+                 standing_steps_limit = NO_ADVANCE_STEP_LIMIT):
         self.actions = actions
         self.num_of_actions = len(actions)
         self.generations = generations
@@ -26,8 +29,10 @@ class GeneticMario:
         self.population = MarioBasicPopulationManger(self.inital_pop)
         self.elite = None
         self.generation = 0
+        self.steps_scale = steps_scale
+        self.allow_death = allow_death
+        self.standing_steps_limit = standing_steps_limit
         self._init_pop()
-
 
     def run(self, render_every=100):
         try:
@@ -65,7 +70,10 @@ class GeneticMario:
         done = False
         action = 0
 
-        for step in range(TIME_SCALE):
+        last_x_pos = 0
+        same_x_pos_cunt = 0
+
+        for step in range(self.steps_scale):
             if done:
                 break
             state, reward, done, info = env.step(action)
@@ -74,7 +82,16 @@ class GeneticMario:
             action = player.act(state)
             player.update_info(info)
             player.reward += reward
-            if info['life'] < INITIAL_LIFE: # will repeat death, so why try more
+            if last_x_pos == info['x_pos']:
+                same_x_pos_cunt += 1
+            else:
+                same_x_pos_cunt = 0
+                last_x_pos = info['x_pos']
+            if same_x_pos_cunt > self.standing_steps_limit:  # end the run if player don't advance:
+                done = True
+            if not self.allow_death and info['life'] < INITIAL_LIFE:  # will repeat death, so why try more
+                done = True
+            if info['flag_get']:  # if got to the flag - run is ended.
                 done = True
             if self.render:
                 env.render()
