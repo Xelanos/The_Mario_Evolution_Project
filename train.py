@@ -41,7 +41,8 @@ def parse_arguments():
                         " steps the agent allow not to change the x position.")
     parser.add_argument("-d", "-allow_death", "-allow_dying", dest="allow_dying", action='store_true', default=False,
                         help="Allow agent to die in a trail.")
-    parser.add_argument("-e", "-env", dest="env", default=DEFAULT_ENVIRONMENT, help="The environment ID to play")
+    parser.add_argument("-e", "-env", "-environment", dest="env", default=DEFAULT_ENVIRONMENT,
+                        help="The environment ID to play")
     parser.add_argument("-record", dest="record", choices=RECORDE_OPTIONS, default=RECORDE_OPTIONS[0],
                         help="Record gameplay options")
     parser.add_argument("-render", dest="render", type=int, default=0, help="Render generation frequency for genetic"
@@ -82,7 +83,7 @@ def save_args_file(args):
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
                      "steps_limit": args.steps_limit,
-                     "action_set": args.action_set,
+                     "action_set": ACTION_SET[args.action_set],
                      "standing_steps_limit": args.standing_steps_limit,
                      "allow_death": args.allow_dying,
                      "env": args.env}

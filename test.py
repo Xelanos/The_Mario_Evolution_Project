@@ -2,27 +2,40 @@ import argparse
 import os
 from datetime import datetime
 import gym_super_mario_bros
+from nes_py.wrappers import JoypadSpace
+from gym import Wrapper
+import gym.wrappers.monitor as monitor
 import human_playing
+from population_manger import MarioBasicPopulationManger
+from player import MarioPlayer
 import pickle
 
 AGENTS = ['human', 'genetic']
 DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
+DEFAULT_STEP_LIMIT = 2000
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Script to train agents.")
     parser.add_argument("-agent", dest='agent', choices=AGENTS, default=AGENTS[1],
                         help="Chose kind of agent for testing.")
-    parser.add_argument("i", "input_dir", dest="input_dir", help="Path for the input data.")
+    parser.add_argument("-i", "-input_dir", dest="input_dir", help="Path for the train output data.")
     parser.add_argument("-o", "-output_dir", dest="output_dir", default="", help="Path for the output data.")
-    parser.add_argument("-e", "-env", dest="env", default=DEFAULT_ENVIRONMENT, help="The environment ID to play")
+    parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', type=int,
+                        help="The maximal frames for a trial.")
+    parser.add_argument("-e", "-env", dest="env", help="The environment ID to play")
     parser.add_argument("-r", "-record", dest="record", action='store_true', default=False,
                         help="Record gameplay options")
 
     args = parser.parse_args()
-    if not args.input_dir:
-        parser.error("You must give a input directory path.")
-    elif not os.path.isdir(args.input_dir):
-        parser.error("The input path is not valid. Check if the directory was removed.")
+    if args.agent != "human":
+        if not args.input_dir:
+            parser.error("You must give a input directory path.")
+        elif not os.path.isdir(args.input_dir):
+            parser.error("The input path is not valid. Check if the directory was removed.")
+        elif not os.path.isfile(os.path.join(args.input_dir, "train_arguments.pic")):
+            parser.error("Missing train_arguments.pic file from input directory.")
+        elif args.agent == "genetic" and not os.path.isfile(os.path.join(args.input_dir, "PopulationManger.pic")):
+            parser.error("Missing PopulationManger.pic file from input directory.")
     if not args.output_dir:
         # make default output directory
         default_output_dir = "test_output_{agent}_{date}".format(agent=args.agent, date=datetime.now().strftime("%d-%m_%H-%M"))
@@ -34,22 +47,91 @@ def parse_arguments():
     return args
 
 
+def get_input_args(input_dir_path):
+    with open(os.path.join(input_dir_path, "train_arguments.pic"), "rb") as arguments_file:
+        args_dict = pickle.load(arguments_file)
+    return args_dict
+
+
+def run_agent(player: MarioPlayer, env: Wrapper, record: bool, index):
+    if record:
+        rec_output_path = os.path.join(vids_path, "vid", "{name}.mp4".
+                                       format(name=index))
+        rec = monitor.video_recorder.VideoRecorder(env, path=rec_output_path)
+
+    env.reset()
+    done = False
+    state = None
+
+    for step in range(steps_limit):
+        if done:
+            break
+        action = player.act(state)
+        state, reward, done, info = env.step(action)
+        env.render()
+        if record:
+            rec.capture_frame()
+        player.update_info(info)
+        player.update_reward(reward)
+        if info['flag_get']:  # if got to the flag - run is ended.
+            done = True
+
+    if record:
+        rec.close()
+    player.calculate_fitness()
+    outcome = player.get_run_info()
+    outcome['index'] = index
+    return outcome
+
+
 if __name__ == "__main__":
     args = parse_arguments()
+    input_args = get_input_args(args.input_dir)
+
+    if args.env is not None:
+        if args.env != input_args['env']:
+            print("Attention: The agent was trained {org_env} and will perform on {env}. "
+                  "That can influence the results.".format(org_env=input_args['env'], env=args.env))
+        env = gym_super_mario_bros.make(args.env)
+    else:
+        env = gym_super_mario_bros.make(input_args['env'])
+    if args.steps_limit:
+        if args.steps_limit != input_args['steps_limit']:
+            print("Attention: The agent was trained with a limit of {org_steps_limit} steps and will "
+                  "perform with a limit of {steps_limit}. That can influence the results.".
+                  format(org_steps_limit=input_args['steps_limit'], steps_limit=args.steps_limit))
+        steps_limit = args.steps_limit
+    else:
+        steps_limit = input_args['steps_limit']
     if args.record:
         vids_path = os.path.join(args.output_dir, "vid")
         if not os.path.isdir(vids_path):
             os.mkdir(vids_path)
     else:
         vids_path = ""
+
     if args.agent == "human":
         print("Stating human agent test:")
         if args.record:
             current_record_path = os.path.join(vids_path, "human_record_test.mp4")
         else:
             current_record_path = ""
-        outcome = human_playing.run(env=gym_super_mario_bros.make(args.env),
-                                    max_steps=args.steps_limit,
-                                    standing_steps_limit=args.standing_steps_limit,
-                                    allow_dying=args.allow_dying,
+        outcome = human_playing.run(env=env,
+                                    max_steps=steps_limit,
+                                    standing_steps_limit=steps_limit,
+                                    allow_dying=True,
                                     record=current_record_path)
+    elif args.agent == "genetic":
+        actions = input_args['action_set']
+        with open(os.path.join(args.input_dir, "PopulationManger.pic"), 'rb') as PopulationManger:
+            population = pickle.load(PopulationManger)
+            members = population.get_elite()
+            env = JoypadSpace(env, actions)
+            outcomes = []
+            for member in members:
+                player = MarioPlayer(len(actions), member.genes)
+                outcome = run_agent(player, env, args.record, member.get_name())
+                outcomes.append(outcome)
+            env.close()
+
+
