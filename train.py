@@ -1,5 +1,6 @@
 import argparse
 import os
+import pickle
 from datetime import datetime
 from pandas import DataFrame
 import gym_super_mario_bros
@@ -73,6 +74,21 @@ def parse_arguments():
     return args
 
 
+def save_args_file(args):
+    with open(os.path.join(args.output_dir, "train_arguments.pic"), "wb") as arguments_file:
+        args_dict = {"agent": args.agent,
+                     "output_dir": args.output_dir,
+                     "num_of_loops": args.loop_times,
+                     "initial_population": args.initial_population,
+                     "elite_size": args.elite_size,
+                     "steps_limit": args.steps_limit,
+                     "action_set": args.action_set,
+                     "standing_steps_limit": args.standing_steps_limit,
+                     "allow_death": args.allow_dying,
+                     "env": args.env}
+        pickle.dump(args_dict, arguments_file)
+
+
 def write_summary(args, output_data_frame: DataFrame):
     with open(os.path.join(args.output_dir, "summary.txt"), 'w') as summary_file:
         summary_file.write("Summary for training {agent} agent on {env}".format(agent=args.agent, env=args.env))
@@ -115,6 +131,7 @@ def write_summary(args, output_data_frame: DataFrame):
 
 if __name__ == "__main__":
     args = parse_arguments()
+    save_args_file(args)
     if args.agent == "human":
         if args.record != RECORDE_OPTIONS[0]:
             vids_path = os.path.join(args.output_dir, "vid")
