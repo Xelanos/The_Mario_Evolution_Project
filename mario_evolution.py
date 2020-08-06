@@ -65,7 +65,7 @@ class GeneticMario:
                     updated_members.append(member)
                 self.population.population = updated_members
                 self._save_generation_outcome(gen_outcomes)
-                self.population = self.population.make_next_generation()
+                self.population.make_next_generation()
                 gc.collect()
 
             self._save(outcomes)
