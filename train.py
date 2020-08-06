@@ -128,7 +128,7 @@ if __name__ == "__main__":
         model = GeneticMario(mario_environment=args.env,
                              actions=ACTION_SET[args.action_set],
                              generations=args.loop_times,
-                             initial_pop=args.inital_poplation,
+                             initial_pop=args.initial_population,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,

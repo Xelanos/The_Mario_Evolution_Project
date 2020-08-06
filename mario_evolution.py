@@ -124,13 +124,7 @@ class GeneticMario:
             pickle.dump(self.population, f)
 
     def _save(self):
-        if not os.path.isdir("saved"):
-            os.mkdir("saved")
-
-        with open("saved/saved_gen.pic", 'wb') as f:
-            pickle.dump(self.generation, f)
-
-        with open("saved/saved_pop.pic", 'wb') as f:
+        with open(os.path.join(self.output_dir, "PopulationManger.pic"), 'wb') as f:
             pickle.dump(self.population, f)
 
 
