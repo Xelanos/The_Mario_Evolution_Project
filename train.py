@@ -115,13 +115,13 @@ def write_summary(args, output_data_frame: DataFrame):
 
 if __name__ == "__main__":
     args = parse_arguments()
-    if args.record != RECORDE_OPTIONS[0]:
-        vids_path = os.path.join(args.output_dir, "vid")
-        if not os.path.isdir(vids_path):
-            os.mkdir(vids_path)
-    else:
-        vids_path = ""
     if args.agent == "human":
+        if args.record != RECORDE_OPTIONS[0]:
+            vids_path = os.path.join(args.output_dir, "vid")
+            if not os.path.isdir(vids_path):
+                os.mkdir(vids_path)
+        else:
+            vids_path = ""
         outcomes = []
         for trial in range(args.loop_times):
             print("Stating human trial {}:".format(trial))
