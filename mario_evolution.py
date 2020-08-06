@@ -40,6 +40,7 @@ class GeneticMario:
         self.env = mario_environment
 
     def run(self, render_every=100, record_every=0):
+        outcomes = []
         try:
             for gen in range(self.generations):
                 self.generation = gen
@@ -53,18 +54,26 @@ class GeneticMario:
                     os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
 
                 pool = Pool()
-                gen_outcomes = pool.map_async(self.run_player, self.population).get()
+                gen_outcomes_and_updated_members = pool.map_async(self.run_player, self.population).get()
                 pool.close()
                 pool.join()
-                self._save_generation_outcome(list(gen_outcomes))
+                gen_outcomes = []
+                updated_members = []
+                for outcome, member in gen_outcomes_and_updated_members:
+                    gen_outcomes.append(outcome)
+                    outcomes.append(outcome)
+                    updated_members.append(member)
+                self.population.population = updated_members
+                self._save_generation_outcome(gen_outcomes)
                 self.population = self.population.make_next_generation()
                 gc.collect()
 
             self._save()
+            return outcomes
         except Exception as e:
             self._save()
             traceback.print_exc(e)
-            return
+            return outcomes
 
     def run_player(self, member):
         env = gym_super_mario_bros.make(self.env)
@@ -115,7 +124,7 @@ class GeneticMario:
         outcome = player.get_run_info()
         outcome['generation'] = self.generation
         outcome['index'] = member.get_name()
-        return outcome
+        return outcome, member
 
     def _save_generation_outcome(self, outcomes):
         df = DataFrame(outcomes)
