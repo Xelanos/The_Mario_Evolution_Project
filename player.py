@@ -29,7 +29,7 @@ class MarioPlayer:
         self.did_win = False
 
     def act(self, state):
-        if state:
+        if state is not None:
             grayscale_stat = tf.image.rgb_to_grayscale(state)
             grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
             actions = self.model.predict(grayscale_stat, batch_size=1)
