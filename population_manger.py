@@ -70,10 +70,10 @@ class PopulationManger():
 class MarioBasicPopulationManger(PopulationManger):
 
     def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=len(SIMPLE_MOVEMENT),
-                 elite_portion=ELITE_DEFAULT_SIZE):
+                 elite_size=ELITE_DEFAULT_SIZE):
         super().__init__(population_size)
         self.num_of_actions = num_of_actions
-        self.elite_size = min(max(2, ELITE_DEFAULT_SIZE), self.size)
+        self.elite_size = min(max(2, elite_size), self.size)
         self.cross_prob = 0.5
         self.mutation_rate = 0.80 - (0.0006 * self.gen_number)
         self.mutation_power = 0.1

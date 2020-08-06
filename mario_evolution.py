@@ -14,6 +14,7 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from multiprocessing import Pool, cpu_count
 
+ELITE_DEFAULT_SIZE = 10
 TIME_SCALE = 200
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
@@ -21,13 +22,14 @@ NO_ADVANCE_STEP_LIMIT = 100
 
 class GeneticMario:
 
-    def __init__(self, mario_environment, actions, generations, initial_pop, steps_scale=TIME_SCALE, allow_death=False,
-                 standing_steps_limit=NO_ADVANCE_STEP_LIMIT, output_dir=""):
+    def __init__(self, mario_environment, actions, generations, initial_pop, elite_size=ELITE_DEFAULT_SIZE,
+                 steps_scale=TIME_SCALE, allow_death=False, standing_steps_limit=NO_ADVANCE_STEP_LIMIT, output_dir=""):
         self.actions = actions
         self.num_of_actions = len(actions)
         self.generations = generations
         self.initial_pop = initial_pop
-        self.population = MarioBasicPopulationManger(self.initial_pop, self.num_of_actions)
+        self.elite_size = elite_size
+        self.population = MarioBasicPopulationManger(self.initial_pop, self.num_of_actions, self.elite_size)
         self.elite = None
         self.generation = 0
         self.steps_scale = steps_scale
@@ -65,7 +67,8 @@ class GeneticMario:
                     updated_members.append(member)
                 self.population.population = updated_members
                 self._save_generation_outcome(gen_outcomes)
-                self.population.make_next_generation()
+                if gen != self.generations - 1:
+                    self.population.make_next_generation()
                 gc.collect()
 
             self._save(outcomes)

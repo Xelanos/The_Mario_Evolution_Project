@@ -16,6 +16,7 @@ ACTION_SET = {"right_only": actions.RIGHT_ONLY, "simple": actions.SIMPLE_MOVEMEN
 DEFAULT_ACTION_SET = "simple"
 TRIALS = 10
 INITIAL_POP = 150
+ELITE_DEFAULT_SIZE = 10
 RECORDE_OPTIONS = ["none", 'some', 'all']
 DEFAULT_RECORDE_FREQUENCY = 100
 
@@ -28,6 +29,8 @@ def parse_arguments():
                         help="Number of trials or generations to run.")
     parser.add_argument("-initial_population", "-i_p", dest="initial_population", type=int, default=INITIAL_POP,
                         help="The size of initial population for genetic agent.")
+    parser.add_argument("-elite_size", "-e_s", dest="elite_size", type=int, default=ELITE_DEFAULT_SIZE,
+                        help="For genetic agent, the size of the elite to breed for the next generation")
     parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
                         help="The maximal frames for a trial.")
     parser.add_argument("-a", "-action_set", dest="action_set", choices=ACTION_SET.keys(), default=DEFAULT_ACTION_SET,
@@ -45,7 +48,6 @@ def parse_arguments():
     parser.add_argument("-rf", "-record_frequency", dest="record_frequency", default=DEFAULT_RECORDE_FREQUENCY, type=int,
                         help="The frequency of trails that will be recoded if 'some' was chosen for record option.")
 
-
     args = parser.parse_args()
     if args.loop_times < 0:
         parser.error("number of trials\generations must to be positive.")
@@ -53,6 +55,8 @@ def parse_arguments():
         parser.error("steps limit must to be positive.")
     if args.initial_population < 1:
         parser.error("Initial population size have to be positive.")
+    if args.elite_size < 2 or args.elite_size > args.initial_population:
+        parser.error("Elite size is smaller then 2 or bigger then the population size.")
     if args.standing_steps_limit < 1:
         parser.error("The limit for standing must be positive.")
     if not args.output_dir:
@@ -82,7 +86,8 @@ def write_summary(args, output_data_frame: DataFrame):
                            "{allow_dying} allow player to die.\n".format(standing_limit=args.standing_steps_limit,
                                                                 allow_dying="Didn't" if args.allow_dying else "Did"))
         if args.agent == "genetic":
-            summary_file.write("Initial population is: {i_p}\n".format(i_p=args.inital_poplation))
+            summary_file.write("Initial population is: {i_p}\n"
+                               "Elite size is: {e_s}\n".format(i_p=args.inital_poplation, e_s=args.elite_size))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -93,10 +98,19 @@ def write_summary(args, output_data_frame: DataFrame):
             summary_file.write("Best performance: trial number {best_index} with performance score of"
                                " {performance_score}. ".format(best_index = best_result_index + 1,
                                                                performance_score=info['performance_score']))
-            if info['finish_level']:
-                summary_file.write("Finish level with size {size}. ".format(size=info['finish_status']))
-            summary_file.write("Finish in {steps} steps and {deaths} deaths. Score {score} and {coins} coins.\n".format(
-                steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
+        if args.agent == "genetic":
+            last_gen_outcome = output_data_frame.loc[output_data_frame['generation'] == max(output_data_frame['generation'])]
+            summary_file.write("Average performance score of last generation elite is {avg_score}\n".
+                               format(avg_score=last_gen_outcome.mean(axis=0)['performance_score']))
+            best_result_index = last_gen_outcome['performance_score'].idxmax()
+            info = df.iloc[best_result_index]
+            summary_file.write("Best performance: {best_index} with performance score of"
+                               " {performance_score}. ".format(best_index=info['index'],
+                                                               performance_score=info['performance_score']))
+        if info['finish_level']:
+            summary_file.write("Finish level with size {size}. ".format(size=info['finish_status']))
+        summary_file.write("Finish in {steps} steps and {deaths} deaths. Score {score} and {coins} coins.\n".format(
+            steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
 
 
 if __name__ == "__main__":
@@ -129,6 +143,7 @@ if __name__ == "__main__":
                              actions=ACTION_SET[args.action_set],
                              generations=args.loop_times,
                              initial_pop=args.initial_population,
+                             elite_size=args.elite_size,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,
@@ -137,5 +152,5 @@ if __name__ == "__main__":
             record_frequency = 0
         else:
             record_frequency = args.record_frequency if args.record == RECORDE_OPTIONS[1] else 1
-        model.run(render_every=args.render, record_every=record_frequency)
-
+        outcomes = model.run(render_every=args.render, record_every=record_frequency)
+        write_summary(args, DataFrame(outcomes))
