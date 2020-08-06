@@ -68,10 +68,10 @@ class GeneticMario:
                 self.population = self.population.make_next_generation()
                 gc.collect()
 
-            self._save()
+            self._save(outcomes)
             return outcomes
         except Exception as e:
-            self._save()
+            self._save(outcomes)
             traceback.print_exc(e)
             return outcomes
 
@@ -132,7 +132,9 @@ class GeneticMario:
         with open(os.path.join(self.current_gen_output_dir, "PopulationManger.pic"), 'wb') as f:
             pickle.dump(self.population, f)
 
-    def _save(self):
+    def _save(self, outcomes):
+        df = DataFrame(outcomes)
+        df.to_csv(os.path.join(self.output_dir, "genetic_output.csv"))
         with open(os.path.join(self.output_dir, "PopulationManger.pic"), 'wb') as f:
             pickle.dump(self.population, f)
 
