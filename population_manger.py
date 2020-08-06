@@ -64,7 +64,7 @@ class PopulationManger():
 
 class MarioBasicPopulationManger(PopulationManger):
 
-    def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=SIMPLE_MOVEMENT):
+    def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=len(SIMPLE_MOVEMENT)):
         super().__init__(population_size)
         self.num_of_actions = num_of_actions
 
