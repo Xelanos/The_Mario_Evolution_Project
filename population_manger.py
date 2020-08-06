@@ -1,25 +1,32 @@
 import copy
-
+from player import MarioPlayer
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 import numpy as np
 
-class Member():
+DEFAULT_POPULATION_SIZE = 150
 
-    def __init__(self, genes, fitness_score=0):
+
+class Member():
+    """
+    Represent a member in PopulationManger
+    """
+    def __init__(self, genes, fitness_score=0, name=""):
         self.genes = genes
         self.fitness_score = fitness_score
-        self.mating_probabilty = 0
+        self.mating_probability = 0
+        self.name = name
 
     def set_mating_probabilty(self, prob):
         if prob > 1 or prob < 0:
             raise Exception(f"Invalid probabily given: {prob}")
 
-        self.mating_probabilty = prob
+        self.mating_probability = prob
 
     def set_fitness_score(self, score):
-        if score < 0:
-            raise Exception(f"Fitness score cannot be smaller then 0")
         self.fitness_score = score
 
+    def get_name(self):
+        return self.name
 
 
 class PopulationManger():
@@ -32,10 +39,8 @@ class PopulationManger():
     def __iter__(self):
         return self.population.__iter__()
 
-
     def add_member(self, member):
         self.population.append(member)
-
 
     def remove_member(self, member):
         self.population.remove(member)
@@ -57,15 +62,23 @@ class PopulationManger():
         pass
 
 
-
 class MarioBasicPopulationManger(PopulationManger):
 
-    def __init__(self, population_size):
+    def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=SIMPLE_MOVEMENT):
         super().__init__(population_size)
+        self.num_of_actions = num_of_actions
+
         self.cross_prob = 0.5
         self.mutation_rate = 0.80 - (0.0006 * self.gen_number)
         self.mutation_power = 0.1
         self.tournament_size = 10
+        # init all members:
+        for index in range(self.size):
+            player = MarioPlayer(self.num_of_actions)
+            member_name = "member_{index}_gen_{gen_index}".format(index=index, gen_index=self.gen_number)
+            self.add_member(Member(player.get_weights(), 0, member_name))
+
+
 
     def pick_from_population(self):
         tournament = np.random.choice(self.population, size=self.tournament_size)

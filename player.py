@@ -1,5 +1,9 @@
 import os
 
+INITIAL_LIFE = 2
+INITIAL_STATUS = 'small'
+DEFAULT_ACTION = 0
+
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -16,15 +20,23 @@ class MarioPlayer:
         self.fitness = 0
         self.farthest_x = 0
         self.farthest_x_time = 400
+        self.sum_reward = 0
         self.steps_count = 0
-        self.reward = 0
-
+        self.score = 0
+        self.lives = INITIAL_LIFE
+        self.coins = 0
+        self.status = INITIAL_STATUS
+        self.did_win = False
 
     def act(self, state):
-        grayscale_stat = tf.image.rgb_to_grayscale(state)
-        grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
-        actions = self.model.predict(grayscale_stat, batch_size=1)
-        action = np.argmax(actions)
+        if state:
+            grayscale_stat = tf.image.rgb_to_grayscale(state)
+            grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
+            actions = self.model.predict(grayscale_stat, batch_size=1)
+            action = np.argmax(actions)
+        else:
+            action = DEFAULT_ACTION
+        self.steps_count += 1
         return action
 
     def update_info(self, info):
@@ -32,12 +44,26 @@ class MarioPlayer:
             self.farthest_x = info['x_pos']
             self.farthest_x_time = info['time']
         self.score = info['score']
+        self.lives = -1 if info['life'] == 255 else info['life']
+        self.coins = info['coins']
+        self.status = info['status']
         self.did_win = info['flag_get'] if info['flag_get'] else self.did_win
 
+    def update_reward(self, reward):
+        self.sum_reward += reward
+        return self.sum_reward
+
+    def get_run_info(self):
+        avg_reward = self.sum_reward / self.steps_count if self.steps_count else 0
+        return {'sum_reward': avg_reward, 'steps': self.steps_count, 'score': self.score,
+                'deaths': INITIAL_LIFE - self.lives, 'coins': self.coins, 'finish_status': self.status,
+                'finish_level': self.did_win, 'performance_score': self.calculate_fitness()}
+
     def calculate_fitness(self, values_weights=np.array([10, 1, 10000])):
-        # self.fitness = self.reward
-        # return self.reward
-        values = np.array([self.reward, self.score, 1 if self.did_win else 0])
+        avg_reward = self.sum_reward / self.steps_count if self.steps_count else 0
+        # self.fitness = avg_reward
+        # return avg_reward
+        values = np.array([avg_reward, self.score, 1 if self.did_win else 0])
         return sum(values*values_weights)
 
     def _make_model(self, number_of_actions, weights):

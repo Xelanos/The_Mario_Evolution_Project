@@ -38,8 +38,10 @@ def parse_arguments():
     parser.add_argument("-d", "-allow_death", "-allow_dying", dest="allow_dying", action='store_true', default=False,
                         help="Allow agent to die in a trail.")
     parser.add_argument("-e", "-env", dest="env", default=DEFAULT_ENVIRONMENT, help="The environment ID to play")
-    parser.add_argument("-r", "-record", dest="record", choices=RECORDE_OPTIONS, default=RECORDE_OPTIONS[0],
+    parser.add_argument("-record", dest="record", choices=RECORDE_OPTIONS, default=RECORDE_OPTIONS[0],
                         help="Record gameplay options")
+    parser.add_argument("-render", dest="render", type=int, default=0, help="Render generation frequency for genetic"
+                                                                            " agent. If 0 - don't render")
     parser.add_argument("-rf", "-record_frequency", dest="record_frequency", default=DEFAULT_RECORDE_FREQUENCY, type=int,
                         help="The frequency of trails that will be recoded if 'some' was chosen for record option.")
 
@@ -123,13 +125,17 @@ if __name__ == "__main__":
         df.to_csv(os.path.join(args.output_dir, "output.csv"))
         write_summary(args, df)
     elif args.agent == "genetic":
-        model = GeneticMario(actions=ACTION_SET[args.action_set],
+        model = GeneticMario(mario_environment=args.env,
+                             actions=ACTION_SET[args.action_set],
                              generations=args.loop_times,
                              initial_pop=args.inital_poplation,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,
-                             output_dir=args.output_dir,
-                             record=args.record == RECORDE_OPTIONS[1] or args.record == RECORDE_OPTIONS[2])
-        model.run()
+                             output_dir=args.output_dir)
+        if args.record == RECORDE_OPTIONS[0]:
+            record_frequency = 0
+        else:
+            record_frequency = args.record_frequency if args.record == RECORDE_OPTIONS[1] else 1
+        model.run(render_every=args.render, record_every=record_frequency)
 
