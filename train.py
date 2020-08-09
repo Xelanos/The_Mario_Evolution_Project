@@ -1,6 +1,6 @@
 import argparse
 import os
-import pickle
+import json
 from datetime import datetime
 from pandas import DataFrame
 import gym_super_mario_bros
@@ -76,7 +76,7 @@ def parse_arguments():
 
 
 def save_args_file(args):
-    with open(os.path.join(args.output_dir, "train_arguments.pic"), "wb") as arguments_file:
+    with open(os.path.join(args.output_dir, "train_arguments.json"), "w") as arguments_file:
         args_dict = {"agent": args.agent,
                      "output_dir": args.output_dir,
                      "num_of_loops": args.loop_times,
@@ -87,7 +87,7 @@ def save_args_file(args):
                      "standing_steps_limit": args.standing_steps_limit,
                      "allow_death": args.allow_dying,
                      "env": args.env}
-        pickle.dump(args_dict, arguments_file)
+        json.dump(args_dict, arguments_file)
 
 
 def write_summary(args, output_data_frame: DataFrame):

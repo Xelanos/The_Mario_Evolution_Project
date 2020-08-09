@@ -10,6 +10,7 @@ from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
 from pandas import DataFrame
 import pickle
+import json
 from train import ACTION_SET
 
 AGENTS = ['human', 'genetic']
@@ -34,8 +35,8 @@ def parse_arguments():
             parser.error("You must give a input directory path.")
         elif not os.path.isdir(args.input_dir):
             parser.error("The input path is not valid. Check if the directory was removed.")
-        elif not os.path.isfile(os.path.join(args.input_dir, "train_arguments.pic")):
-            parser.error("Missing train_arguments.pic file from input directory.")
+        elif not os.path.isfile(os.path.join(args.input_dir, "train_arguments.json")):
+            parser.error("Missing train_arguments.json file from input directory.")
         elif args.agent == "genetic" and not os.path.isfile(os.path.join(args.input_dir, "PopulationManger.pic")):
             parser.error("Missing PopulationManger.pic file from input directory.")
     else:
@@ -58,8 +59,8 @@ def parse_arguments():
 
 def get_input_args(args):
     if args.input_dir is not None:
-        with open(os.path.join(args.input_dir, "train_arguments.pic"), "rb") as arguments_file:
-            args_dict = pickle.load(arguments_file)
+        with open(os.path.join(args.input_dir, "train_arguments.json"), "r") as arguments_file:
+            args_dict = json.load(arguments_file)
     elif args.agent == "human":
         args_dict = {"agent": args.agent,
                      "steps_limit": args.steps_limit,
@@ -116,7 +117,7 @@ def run_agent(player: MarioPlayer, env: Wrapper, record: bool, index):
                                        format(name=index))
         rec = monitor.video_recorder.VideoRecorder(env, path=rec_output_path)
 
-    state =env.reset()
+    state = env.reset()
     done = False
 
     for step in range(steps_limit):
