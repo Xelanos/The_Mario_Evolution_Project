@@ -142,7 +142,7 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
             avg_reward = reward_sum / num_of_steps
             info['life'] = -1 if info['life'] == 255 else info['life']
             values = np.array([avg_reward, info['score'], 1 if info["flag_get"] else 0])
-            outcome = {'sum_reward': avg_reward, 'steps': num_of_steps, 'score': info['score'],
+            outcome = {'avg_reward': avg_reward, 'steps': num_of_steps, 'score': info['score'],
                        'deaths': INITIAL_LIFE - info['life'], 'coins': info['coins'], 'finish_status': info['status'],
                        'finish_level': info["flag_get"], 'performance_score': sum(values*values_weights)}
             print("Done in {} steps. Average sum_reward {}. {} to the flag.".format(num_of_steps, avg_reward,

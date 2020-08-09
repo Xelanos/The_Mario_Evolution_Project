@@ -55,7 +55,7 @@ class MarioPlayer:
 
     def get_run_info(self):
         avg_reward = self.sum_reward / self.steps_count if self.steps_count else 0
-        return {'sum_reward': avg_reward, 'steps': self.steps_count, 'score': self.score,
+        return {'avg_reward': avg_reward, 'steps': self.steps_count, 'score': self.score,
                 'deaths': INITIAL_LIFE - self.lives, 'coins': self.coins, 'finish_status': self.status,
                 'finish_level': self.did_win, 'performance_score': self.calculate_fitness()}
 

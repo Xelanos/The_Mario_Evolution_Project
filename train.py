@@ -83,7 +83,7 @@ def save_args_file(args):
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
                      "steps_limit": args.steps_limit,
-                     "action_set": ACTION_SET[args.action_set],
+                     "action_set": args.action_set,
                      "standing_steps_limit": args.standing_steps_limit,
                      "allow_death": args.allow_dying,
                      "env": args.env}

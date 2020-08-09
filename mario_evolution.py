@@ -88,9 +88,8 @@ class GeneticMario:
                                            format(name=member.get_name()))
             rec = monitor.video_recorder.VideoRecorder(env, path=rec_output_path)
 
-        env.reset()
+        state = env.reset()
         done = False
-        state = None
 
         last_x_pos = 0
         same_x_pos_cunt = 0
