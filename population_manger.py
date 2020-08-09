@@ -3,6 +3,9 @@ from player import MarioPlayer
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 import numpy as np
 from itertools import combinations
+import os
+import json
+import glob
 
 DEFAULT_POPULATION_SIZE = 150
 ELITE_DEFAULT_SIZE = 2
@@ -144,6 +147,38 @@ class MarioBasicPopulationManger(PopulationManger):
             weights[i] = noise[i]
             new_weights.append(weights)
         member.genes = new_weights
+
+    def save_population(self, output_dir):
+        for member in self.population:
+            with open(os.path.join(output_dir, member.get_name() + ".npz"), 'wb') as f:
+                np.savez(f, member.genes)
+        manager_values = {"gen_number": self.gen_number,
+                          "num_of_actions": self.num_of_actions,
+                          "population_size": self.size,
+                          "elite_size": self.elite_size,
+                          "cross_prob": self.cross_prob,
+                          "mutation_rate": self.mutation_rate,
+                          "mutation_power": self.mutation_power,
+                          "tournament_size": self.tournament_size}
+        with open(os.path.join(output_dir, "manager_values.json"), 'w') as f:
+            json.dump(manager_values, f)
+
+    def load_population(self, input_dir):
+        with open(os.path.join(input_dir, "manager_values.json"), 'r') as f:
+            manager_values = json.load(f)
+            self.gen_number = manager_values["gen_number"]
+            self.size = manager_values["population_size"]
+            self.num_of_actions = manager_values["num_of_actions"]
+            self.elite_size = manager_values["elite_size"]
+            self.cross_prob = manager_values["cross_prob"]
+            self.mutation_rate = manager_values["mutation_rate"]
+            self.mutation_power = manager_values["mutation_power"]
+            self.tournament_size = manager_values["tournament_size"]
+        for f_p in glob.glob(input_dir + "/*.npz"):
+            with open(f_p, 'rb') as f:
+                self.add_member(Member(np.load(f)))
+
+
 
 
 
