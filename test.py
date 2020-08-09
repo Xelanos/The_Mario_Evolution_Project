@@ -150,6 +150,7 @@ if __name__ == "__main__":
                   "That can influence the results.".format(org_env=input_args['env'], env=args.env))
         env = gym_super_mario_bros.make(args.env)
     else:
+        args.env = input_args['env']
         env = gym_super_mario_bros.make(input_args['env'])
     if args.steps_limit:
         if args.steps_limit != input_args['steps_limit']:
@@ -158,6 +159,7 @@ if __name__ == "__main__":
                   format(org_steps_limit=input_args['steps_limit'], steps_limit=args.steps_limit))
         steps_limit = args.steps_limit
     else:
+        args.steps_limit = input_args['steps_limit']
         steps_limit = input_args['steps_limit']
     if args.record:
         vids_path = os.path.join(args.output_dir, "vid")
@@ -186,7 +188,8 @@ if __name__ == "__main__":
             elite = population.get_elite()
             env = JoypadSpace(env, actions)
             outcomes = []
-            for member in elite:
+            for index, member in enumerate(elite):
+                print("running member {index} of the elite.".format(index=index))
                 player = MarioPlayer(len(actions), member.genes)
                 outcome = run_agent(player, env, args.record, member.get_name())
                 outcomes.append(outcome)
