@@ -117,7 +117,6 @@ class MarioBasicPopulationManger(PopulationManger):
         new_weights1 = []
         new_weights2 = []
         cross_prob = 0.5
-        mutation = np.random.uniform() < self.mutation_rate
         for weights1, weights2 in zip(first_member.genes, second_member.genes):
             new1 = copy.deepcopy(weights1)
             new2 = copy.deepcopy(weights2)
@@ -129,8 +128,9 @@ class MarioBasicPopulationManger(PopulationManger):
 
         child1 = Member(new_weights1)
         child2 = Member(new_weights2)
-        if mutation:
+        if np.random.uniform() < self.mutation_rate:
             self.mutate(child1)
+        if np.random.uniform() < self.mutation_rate:
             self.mutate(child2)
         return child1, child2
 
