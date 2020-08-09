@@ -78,6 +78,8 @@ class MarioBasicPopulationManger(PopulationManger):
         self.mutation_rate = 0.80 - (0.0006 * self.gen_number)
         self.mutation_power = 0.1
         self.tournament_size = 10
+
+    def init_pop(self):
         # init all members:
         for index in range(self.size):
             player = MarioPlayer(self.num_of_actions)

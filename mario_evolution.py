@@ -44,6 +44,8 @@ class GeneticMario:
 
     def run(self, render_every=100, record_every=0):
         outcomes = []
+        print("Initializing the first generation with random weights.")
+        self.population.init_pop()
         try:
             for gen in range(self.generations):
                 self.generation = gen
