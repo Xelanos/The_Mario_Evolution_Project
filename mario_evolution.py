@@ -18,6 +18,7 @@ ELITE_DEFAULT_SIZE = 10
 TIME_SCALE = 200
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
+SAVE_POPULATION_MANAGER_EVERY_GENERATION = False
 
 
 class GeneticMario:
@@ -131,8 +132,9 @@ class GeneticMario:
     def _save_generation_outcome(self, outcomes):
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(self.current_gen_output_dir, "gen_{}_output.csv".format(self.generation)))
-        with open(os.path.join(self.current_gen_output_dir, "PopulationManger.pic"), 'wb') as f:
-            pickle.dump(self.population, f)
+        if SAVE_POPULATION_MANAGER_EVERY_GENERATION:
+            with open(os.path.join(self.current_gen_output_dir, "PopulationManger.pic"), 'wb') as f:
+                pickle.dump(self.population, f)
 
     def _save(self, outcomes):
         df = DataFrame(outcomes)
