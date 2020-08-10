@@ -4,7 +4,7 @@ from population_manger import *
 import gym.wrappers.monitor as monitor
 
 import traceback
-import pickle
+import time
 from pandas import DataFrame
 
 import os
@@ -12,7 +12,6 @@ import gc
 
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
-from multiprocessing import Pool, cpu_count
 
 ELITE_DEFAULT_SIZE = 10
 TIME_SCALE = 200
@@ -50,6 +49,7 @@ class GeneticMario:
             for gen in range(self.generations):
                 self.generation = gen
                 print(f'Staring generation {gen + 1}')
+                t = time.time()
                 self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen+1))
                 if os.path.isdir(self.current_gen_output_dir):
                     os.remove(self.current_gen_output_dir)
@@ -58,22 +58,16 @@ class GeneticMario:
                 self.render = (gen % render_every == 0) if render_every else False
                 self.record = (gen % record_every == 0) if record_every else False
                 if self.record:
-                    if os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
+                    if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
                         os.remove(os.path.join(self.current_gen_output_dir, "vid"))
                     os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
-
-                pool = Pool()
-                gen_outcomes_and_updated_members = pool.map_async(self.run_player, self.population).get()
-                pool.close()
-                pool.join()
                 gen_outcomes = []
-                updated_members = []
-                for outcome, member in gen_outcomes_and_updated_members:
+                for member in self.population:
+                    outcome = self.run_player(member)
                     gen_outcomes.append(outcome)
                     outcomes.append(outcome)
-                    updated_members.append(member)
-                self.population.population = updated_members
                 self._save_generation_outcome(gen_outcomes)
+                print(f"finish {gen + 1} in {time.time() - t}")
                 if gen != self.generations - 1:
                     self.population.make_next_generation()
                 gc.collect()
@@ -133,7 +127,7 @@ class GeneticMario:
         outcome = player.get_run_info()
         outcome['generation'] = self.generation
         outcome['index'] = member.get_name()
-        return outcome, member
+        return outcome
 
     def _save_generation_outcome(self, outcomes):
         df = DataFrame(outcomes)
