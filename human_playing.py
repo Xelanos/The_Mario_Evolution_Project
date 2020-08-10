@@ -75,8 +75,8 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
     # create the image viewer
     viewer = ImageViewer(
         env.spec.id if env.spec is not None else env.__class__.__name__,
-        env.observation_space.shape[0],  # height
-        env.observation_space.shape[1],  # width
+        env.unwrapped.observation_space.shape[0],  # height
+        env.unwrapped.observation_space.shape[1],  # width
         monitor_keyboard=True,
         relevant_keys=set(sum(map(list, keys_to_action.keys()), []))
     )
