@@ -16,6 +16,7 @@ AGENTS = ['human', 'genetic']
 DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
 DEFAULT_STEP_LIMIT = 2000
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Script to train agents.")
     parser.add_argument("-agent", dest='agent', choices=AGENTS, default=AGENTS[1],
