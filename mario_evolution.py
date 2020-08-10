@@ -51,6 +51,8 @@ class GeneticMario:
                 self.generation = gen
                 print(f'Staring generation {gen + 1}')
                 self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen+1))
+                if os.path.isdir(self.current_gen_output_dir):
+                    os.remove(self.current_gen_output_dir)
                 os.mkdir(self.current_gen_output_dir)
 
                 self.render = (gen % render_every == 0) if render_every else False
