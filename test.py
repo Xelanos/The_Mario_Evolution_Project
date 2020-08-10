@@ -37,8 +37,8 @@ def parse_arguments():
             parser.error("The input path is not valid. Check if the directory was removed.")
         elif not os.path.isfile(os.path.join(args.input_dir, "train_arguments.json")):
             parser.error("Missing train_arguments.json file from input directory.")
-        elif args.agent == "genetic" and not os.path.isfile(os.path.join(args.input_dir, "PopulationManger.pic")):
-            parser.error("Missing PopulationManger.pic file from input directory.")
+        elif args.agent == "genetic" and not os.path.isfile(os.path.join(args.input_dir, "manager_values.json")):
+            parser.error("Missing manager_values.json file from input directory.")
     else:
         if not args.input_dir or not os.path.isdir(args.input_dir):
             # No input directory is given for human - must have values for env and steps_limit.
@@ -184,18 +184,18 @@ if __name__ == "__main__":
 
     elif args.agent == "genetic":
         actions = ACTION_SET[input_args['action_set']]
-        with open(os.path.join(args.input_dir, "PopulationManger.pic"), 'rb') as PopulationManger:
-            population = pickle.load(PopulationManger)
-            elite = population.get_elite()
-            env = JoypadSpace(env, actions)
-            outcomes = []
-            for index, member in enumerate(elite):
-                print("running member {index} of the elite.".format(index=index))
-                player = MarioPlayer(len(actions), member.genes)
-                outcome = run_agent(player, env, args.record, member.get_name())
-                outcomes.append(outcome)
-            env.close()
-            df = DataFrame(outcomes)
+        population_manager = MarioBasicPopulationManger()
+        population_manager.load_population(args.input_dir)
+        elite = population_manager.get_elite()
+        env = JoypadSpace(env, actions)
+        outcomes = []
+        for index, member in enumerate(elite):
+            print("running member {index} of the elite.".format(index=index))
+            player = MarioPlayer(len(actions), member.genes)
+            outcome = run_agent(player, env, args.record, member.get_name())
+            outcomes.append(outcome)
+        env.close()
+        df = DataFrame(outcomes)
     df.to_csv(os.path.join(args.output_dir, "output.csv"))
     write_summary(args, input_args, df)
 
