@@ -110,8 +110,8 @@ def write_summary(args, output_data_frame: DataFrame):
         else:
             summary_file.write("Agent failed to win any games.\n")
         if args.agent == "human":
-            best_result_index = df['performance_score'].idxmax()
-            info = df.iloc[best_result_index]
+            best_result_index = output_data_frame['performance_score'].idxmax()
+            info = output_data_frame.iloc[best_result_index]
             summary_file.write("Best performance: trial number {best_index} with performance score of"
                                " {performance_score}. ".format(best_index = best_result_index + 1,
                                                                performance_score=info['performance_score']))
@@ -120,7 +120,7 @@ def write_summary(args, output_data_frame: DataFrame):
             summary_file.write("Average performance score of last generation elite is {avg_score}\n".
                                format(avg_score=last_gen_outcome.mean(axis=0)['performance_score']))
             best_result_index = last_gen_outcome['performance_score'].idxmax()
-            info = df.iloc[best_result_index]
+            info = output_data_frame.iloc[best_result_index]
             summary_file.write("Best performance: {best_index} with performance score of"
                                " {performance_score}. ".format(best_index=info['index'],
                                                                performance_score=info['performance_score']))
