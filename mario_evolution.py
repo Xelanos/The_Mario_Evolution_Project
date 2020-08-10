@@ -58,6 +58,8 @@ class GeneticMario:
                 self.render = (gen % render_every == 0) if render_every else False
                 self.record = (gen % record_every == 0) if record_every else False
                 if self.record:
+                    if os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
+                        os.remove(os.path.join(self.current_gen_output_dir, "vid"))
                     os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
 
                 pool = Pool()
