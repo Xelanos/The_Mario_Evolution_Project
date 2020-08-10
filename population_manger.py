@@ -150,8 +150,16 @@ class MarioBasicPopulationManger(PopulationManger):
 
     def save_population(self, output_dir):
         for member in self.population:
-            with open(os.path.join(output_dir, member.get_name() + ".npz"), 'wb') as f:
-                np.savez(f, member.genes)
+            genes_npz_path = os.path.join(output_dir, member.get_name() + "_genes")
+            member_info = {"genes_path": genes_npz_path + ".npz",
+                           "genes_len": len(member.genes),
+                           "fitness_score": member.fitness_score,
+                           "name": member.get_name(),
+                           "mating_probability": member.mating_probability}
+            np.savez_compressed(genes_npz_path, *member.genes)
+            with open(os.path.join(output_dir, member.get_name() + "_info.json"), 'w') as f:
+                json.dump(member_info, f)
+
         manager_values = {"gen_number": self.gen_number,
                           "num_of_actions": self.num_of_actions,
                           "population_size": self.size,
@@ -174,9 +182,17 @@ class MarioBasicPopulationManger(PopulationManger):
             self.mutation_rate = manager_values["mutation_rate"]
             self.mutation_power = manager_values["mutation_power"]
             self.tournament_size = manager_values["tournament_size"]
-        for f_p in glob.glob(input_dir + "/*.npz"):
-            with open(f_p, 'rb') as f:
-                self.add_member(Member(np.load(f)))
+        self.population = []
+        for member_json_path in glob.glob(input_dir + os.sep + "*info.json"):
+            with open(member_json_path, 'r') as f:
+                member_info = json.load(f)
+                loaded_genes = np.load(member_info["genes_path"])
+                genes = []
+                for i in range(member_info["genes_len"]):
+                    genes.append(loaded_genes["arr_" + str(i)])
+                member = Member(genes, member_info["fitness_score"], member_info["name"])
+                member.mating_probability = member_info["mating_probability"]
+                self.add_member(member)
 
 
 

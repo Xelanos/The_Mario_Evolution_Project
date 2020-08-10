@@ -135,14 +135,12 @@ class GeneticMario:
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(self.current_gen_output_dir, "gen_{}_output.csv".format(self.generation)))
         if SAVE_POPULATION_MANAGER_EVERY_GENERATION:
-            with open(os.path.join(self.current_gen_output_dir, "PopulationManger.pic"), 'wb') as f:
-                pickle.dump(self.population, f)
+            self.population.save_population(self.current_gen_output_dir)
 
     def _save(self, outcomes):
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(self.output_dir, "genetic_output.csv"))
-        with open(os.path.join(self.output_dir, "PopulationManger.pic"), 'wb') as f:
-            pickle.dump(self.population, f)
+        self.population.save_population(self.output_dir)
 
 
 
