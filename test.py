@@ -9,7 +9,6 @@ import human_playing
 from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
 from pandas import DataFrame
-import pickle
 import json
 from train import ACTION_SET
 

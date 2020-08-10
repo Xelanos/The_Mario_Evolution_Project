@@ -1,4 +1,3 @@
-from player import MarioPlayer
 from population_manger import *
 
 import gym.wrappers.monitor as monitor
@@ -51,16 +50,14 @@ class GeneticMario:
                 print(f'Staring generation {gen + 1}')
                 t = time.time()
                 self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen+1))
-                if os.path.isdir(self.current_gen_output_dir):
-                    os.remove(self.current_gen_output_dir)
-                os.mkdir(self.current_gen_output_dir)
+                if not os.path.isdir(self.current_gen_output_dir):
+                    os.mkdir(self.current_gen_output_dir)
 
                 self.render = (gen % render_every == 0) if render_every else False
                 self.record = (gen % record_every == 0) if record_every else False
                 if self.record:
                     if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
-                        os.remove(os.path.join(self.current_gen_output_dir, "vid"))
-                    os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
+                        os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
                 gen_outcomes = []
                 for member in self.population:
                     outcome = self.run_player(member)
