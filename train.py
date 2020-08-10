@@ -21,6 +21,7 @@ ELITE_DEFAULT_SIZE = 10
 RECORDE_OPTIONS = ["none", 'some', 'all']
 DEFAULT_RECORDE_FREQUENCY = 100
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Script to train agents.")
     parser.add_argument("-agent", dest='agent', choices=AGENTS, default=AGENTS[0],
@@ -36,7 +37,7 @@ def parse_arguments():
                         help="The maximal frames for a trial.")
     parser.add_argument("-a", "-action_set", dest="action_set", choices=ACTION_SET.keys(), default=DEFAULT_ACTION_SET,
                         help="The set of action the agent can use. Isn't relevant for human agent.")
-    parser.add_argument("-no_action_limit", "-no_advance_limit", "-standing_limit", "-no_progress_limit",
+    parser.add_argument("-no_action_limit", "-no_advance_limit", "-standing_limit", "-no_progress_limit", type=int,
                         dest='standing_steps_limit', default=DEFAULT_NO_ADVANCE_STEP_LIMIT, help="Limit the number of"
                         " steps the agent allow not to change the x position.")
     parser.add_argument("-d", "-allow_death", "-allow_dying", dest="allow_dying", action='store_true', default=False,
