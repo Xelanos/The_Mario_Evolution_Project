@@ -143,6 +143,7 @@ class GeneticMario:
         outcomes = []
         self.population.load_population(input_dir)
         print("Loading completed. Continue run.")
+        self.population.make_next_generation()
         self.generation = self.population.gen_number
         for gen in range(self.generation, self.generations):
             self.generation = gen
