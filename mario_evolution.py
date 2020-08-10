@@ -11,12 +11,13 @@ import gc
 
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
+from wrappers import WarpFrame
 
 ELITE_DEFAULT_SIZE = 10
 TIME_SCALE = 200
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
-SAVE_POPULATION_MANAGER_EVERY_GENERATION = False
+SAVE_POPULATION_MANAGER_EVERY_GENERATION = True
 
 
 class GeneticMario:
@@ -79,6 +80,7 @@ class GeneticMario:
     def run_player(self, member):
         env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
+        env = WarpFrame(env)
         player = MarioPlayer(self.num_of_actions, member.genes)
 
         if self.record:
