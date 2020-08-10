@@ -104,7 +104,7 @@ def write_summary(args, output_data_frame: DataFrame):
                                                                 allow_dying="Didn't" if args.allow_dying else "Did"))
         if args.agent == "genetic":
             summary_file.write("Initial population is: {i_p}\n"
-                               "Elite size is: {e_s}\n".format(i_p=args.inital_poplation, e_s=args.elite_size))
+                               "Elite size is: {e_s}\n".format(i_p=args.initial_population, e_s=args.elite_size))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
