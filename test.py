@@ -10,11 +10,11 @@ import human_playing
 import time
 from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 import json
 from train import ACTION_SET
 
-AGENTS = ['human', 'genetic']
+AGENTS = ['human', 'genetic', "random_nn"]
 DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
 DEFAULT_STEP_LIMIT = 2000
 
@@ -202,6 +202,21 @@ if __name__ == "__main__":
         env.close()
         print(f"finish test in {time.time() - t}")
         df = DataFrame(outcomes)
+
+    elif args.agent == "random_nn":
+        actions = ACTION_SET[input_args['action_set']]
+        env = JoypadSpace(env, actions)
+        env = WarpFrame(env)
+        df = read_csv(os.path.join(args.input_dir, "random_output.csv"))
+        best_result_index = df['performance_score'].idxmax()
+        player = MarioPlayer(len(actions))
+        player.load_player(os.path.join(args.input_dir, f"train_{best_result_index}_info.json"))
+        print("Stating random_nn agent test:")
+        outcome = run_agent(player, env, args.recode, vids_path,best_result_index)
+        env.close()
+        print(f"finish test in {time.time() - t}")
+        t = time.time()
+
     df.to_csv(os.path.join(args.output_dir, "output.csv"))
     write_summary(args, input_args, df)
 
