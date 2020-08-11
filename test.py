@@ -94,7 +94,7 @@ def write_summary(args, input_args, output_data_frame: DataFrame):
             summary_file.write("Agent successfully win the level.\n")
         else:
             summary_file.write("Agent failed to win the level.\n")
-        if args.agent == "human":
+        if args.agent == "human" or args.agent == "random_nn":
             info = output_data_frame.iloc[0]
             summary_file.write("Agent ran for {steps} steps and the performance score is {performance_score}.\n"
                 .format(steps=info["steps"], performance_score=info['performance_score']))
@@ -210,8 +210,9 @@ if __name__ == "__main__":
         df = read_csv(os.path.join(args.input_dir, "random_output.csv"))
         best_result_index = df['performance_score'].idxmax()
         player = MarioPlayer(len(actions))
-        player.load_player(os.path.join(args.input_dir, f"train_{best_result_index}_info.json"))
+        player.load_player(os.path.join(args.input_dir, f"trail_{best_result_index}_info.json"))
         print("Stating random_nn agent test:")
+        t = time.time()
         outcome = run_agent(player, env, args.recode, vids_path,best_result_index)
         env.close()
         print(f"finish test in {time.time() - t}")
