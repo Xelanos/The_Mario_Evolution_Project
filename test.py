@@ -217,6 +217,7 @@ if __name__ == "__main__":
         env.close()
         print(f"finish test in {time.time() - t}")
         t = time.time()
+        df = DataFrame([outcome])
 
     df.to_csv(os.path.join(args.output_dir, "output.csv"))
     write_summary(args, input_args, df)
