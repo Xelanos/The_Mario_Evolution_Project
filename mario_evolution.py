@@ -137,5 +137,38 @@ class GeneticMario:
         df.to_csv(os.path.join(self.output_dir, "genetic_output.csv"))
         self.population.save_population(self.output_dir)
 
+    def continue_run(self, input_dir, render_every=100, record_every=0):
+        outcomes = []
+        self.population.load_population(input_dir)
+        print("Loading completed. Continue run.")
+        self.population.make_next_generation()
+        self.generation = self.population.gen_number
+        for gen in range(self.generations):
+            self.generation = gen
+            print(f'Staring generation {gen + 1}')
+            t = time.time()
+            self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen + 1))
+            if not os.path.isdir(self.current_gen_output_dir):
+                os.mkdir(self.current_gen_output_dir)
+
+            self.render = (gen % render_every == 0) if render_every else False
+            self.record = (gen % record_every == 0) if record_every else False
+            if self.record:
+                if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
+                    os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
+            gen_outcomes = []
+            for member in self.population:
+                outcome = self.run_player(member)
+                gen_outcomes.append(outcome)
+                outcomes.append(outcome)
+            self._save_generation_outcome(gen_outcomes)
+            print(f"finish {gen + 1} in {time.time() - t}")
+            if gen != self.generations - 1:
+                self.population.make_next_generation()
+            gc.collect()
+
+        self._save(outcomes)
+        return outcomes
+
 
 

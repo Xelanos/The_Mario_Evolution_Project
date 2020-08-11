@@ -167,6 +167,7 @@ class MarioBasicPopulationManger(PopulationManger):
                           "num_of_actions": self.num_of_actions,
                           "population_size": self.size,
                           "elite_size": self.elite_size,
+                          "random_pick_size": self.random_pick_size,
                           "cross_prob": self.cross_prob,
                           "mutation_rate": self.mutation_rate,
                           "mutation_power": self.mutation_power,
@@ -181,6 +182,7 @@ class MarioBasicPopulationManger(PopulationManger):
             self.size = manager_values["population_size"]
             self.num_of_actions = manager_values["num_of_actions"]
             self.elite_size = manager_values["elite_size"]
+            self.random_pick_size = manager_values["random_pick_size"]
             self.cross_prob = manager_values["cross_prob"]
             self.mutation_rate = manager_values["mutation_rate"]
             self.mutation_power = manager_values["mutation_power"]
