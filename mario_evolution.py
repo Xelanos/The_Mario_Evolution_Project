@@ -1,6 +1,7 @@
 from population_manger import *
 
 import gym.wrappers.monitor as monitor
+from wrappers import WarpFrame
 
 import traceback
 import time
@@ -79,6 +80,7 @@ class GeneticMario:
     def run_player(self, member):
         env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
+        env = WarpFrame(env)
         player = MarioPlayer(self.num_of_actions, member.genes)
 
         if self.record:

@@ -1,4 +1,5 @@
 import os
+from wrappers import DEFAULT_WARP_FRAME_HEIGHT,DEFAULT_WARP_FRAME_WIDTH
 
 INITIAL_LIFE = 2
 INITIAL_STATUS = 'small'
@@ -12,6 +13,7 @@ import tensorflow as tf
 import numpy as np
 
 initializer = tf.keras.initializers.RandomUniform(minval=-1, maxval=1)
+
 
 class MarioPlayer:
 
@@ -30,8 +32,9 @@ class MarioPlayer:
 
     def act(self, state):
         if state is not None:
-            grayscale_stat = tf.image.rgb_to_grayscale(state)
-            grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
+            #grayscale_stat = tf.image.rgb_to_grayscale(state)
+            #grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
+            grayscale_stat = tf.keras.backend.expand_dims(state, axis=0)
             actions = self.model.predict(grayscale_stat, batch_size=1)
             action = np.argmax(actions)
         else:
@@ -68,7 +71,7 @@ class MarioPlayer:
 
     def _make_model(self, number_of_actions, weights):
         model = tf.keras.Sequential([
-                tf.keras.layers.Input(shape=(240, 256, 1)),
+                tf.keras.layers.Input(shape=(DEFAULT_WARP_FRAME_HEIGHT, DEFAULT_WARP_FRAME_WIDTH, 1)),
                 tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=4, activation=tf.nn.swish, bias_initializer='random_normal'),
                 tf.keras.layers.Conv2D(filters=64, kernel_size=4, strides=2, activation=tf.nn.swish,  bias_initializer='random_normal'),
                 tf.keras.layers.Conv2D(filters=64, kernel_size=3, strides=1, activation=tf.nn.swish,  bias_initializer='random_normal'),

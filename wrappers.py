@@ -7,9 +7,12 @@ from gym import spaces
 import cv2
 cv2.ocl.setUseOpenCL(False)
 
+DEFAULT_WARP_FRAME_WIDTH = 84
+DEFAULT_WARP_FRAME_HEIGHT = 84
+
 
 class WarpFrame(gym.ObservationWrapper):
-    def __init__(self, env, width=84, height=84, grayscale=True):
+    def __init__(self, env, width=DEFAULT_WARP_FRAME_WIDTH, height=DEFAULT_WARP_FRAME_HEIGHT, grayscale=True):
         """Warp frames to 84x84 as done in the Nature paper and later work."""
         gym.ObservationWrapper.__init__(self, env)
         self.width = width
