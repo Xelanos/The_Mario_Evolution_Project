@@ -37,6 +37,8 @@ def parse_arguments():
     parser.add_argument("-random_pick_size", "-random_parents", "-random_pick", "-r_p", dest="random_pick_size",
                         type=int, default=0, help="For genetic agent, the number of members who will randomly picked to"
                                                   " breed for the next generation.")
+    parser.add_argument("-random_members", "-r_m", dest="random_members", default=0, type=int, help="For genetic agent,"
+                        " the number of members with random weights that will be added every generation.")
     parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
                         help="The maximal frames for a trial.")
     parser.add_argument("-a", "-action_set", dest="action_set", choices=ACTION_SET.keys(), default=DEFAULT_ACTION_SET,
@@ -66,6 +68,8 @@ def parse_arguments():
         parser.error("Elite size is smaller then 2 or bigger then the population size.")
     if args.random_pick_size < 0:
         parser.error("Random pick size must to be positive.")
+    if args.random_members < 0:
+        parser.error("Random members number must to be positive.")
     if args.standing_steps_limit < 1:
         parser.error("The limit for standing must be positive.")
     if not args.output_dir:
@@ -90,6 +94,7 @@ def save_args_file(args):
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
                      "random_pick_size": args.random_pick_size,
+                     "random_members": args.random_members,
                      "steps_limit": args.steps_limit,
                      "action_set": args.action_set,
                      "standing_steps_limit": args.standing_steps_limit,
@@ -113,8 +118,11 @@ def write_summary(args, output_data_frame: DataFrame):
         if args.agent == "genetic":
             summary_file.write("Initial population is: {i_p}\n"
                                "Elite size is: {e_s}\n"
-                               "Random pick size is {r_p}".format(i_p=args.initial_population, e_s=args.elite_size,
-                                                                  r_p=args.random_pick_size))
+                               "Random pick size is {r_p}\n"
+                               "Random members number is {r_m}\n".format(i_p=args.initial_population,
+                                                                e_s=args.elite_size,
+                                                                r_p=args.random_pick_size,
+                                                                r_m=args.random_members))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -173,6 +181,7 @@ if __name__ == "__main__":
                              initial_pop=args.initial_population,
                              elite_size=args.elite_size,
                              random_pick_size=args.random_pick_size,
+                             random_members=args.random_members,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,
