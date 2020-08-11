@@ -89,6 +89,7 @@ def save_args_file(args):
                      "num_of_loops": args.loop_times,
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
+                     "random_pick_size": args.random_pick_size,
                      "steps_limit": args.steps_limit,
                      "action_set": args.action_set,
                      "standing_steps_limit": args.standing_steps_limit,
@@ -111,7 +112,9 @@ def write_summary(args, output_data_frame: DataFrame):
                                                                 allow_dying="Didn't" if args.allow_dying else "Did"))
         if args.agent == "genetic":
             summary_file.write("Initial population is: {i_p}\n"
-                               "Elite size is: {e_s}\n".format(i_p=args.initial_population, e_s=args.elite_size))
+                               "Elite size is: {e_s}\n"
+                               "Random pick size is {r_p}".format(i_p=args.initial_population, e_s=args.elite_size,
+                                                                  r_p=args.random_pick_size))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -169,6 +172,7 @@ if __name__ == "__main__":
                              generations=args.loop_times,
                              initial_pop=args.initial_population,
                              elite_size=args.elite_size,
+                             random_pick_size=args.random_pick_size,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,
