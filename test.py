@@ -213,7 +213,7 @@ if __name__ == "__main__":
         player.load_player(os.path.join(args.input_dir, f"trail_{best_result_index}_info.json"))
         print("Stating random_nn agent test:")
         t = time.time()
-        outcome = run_agent(player, env, args.recode, vids_path,best_result_index)
+        outcome = run_agent(player, env, args.record, vids_path,best_result_index)
         env.close()
         print(f"finish test in {time.time() - t}")
         t = time.time()
