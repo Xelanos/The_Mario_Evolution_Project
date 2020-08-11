@@ -31,7 +31,7 @@ class RandomMarioPlayer:
 
     def run(self, render_every=100, record_every=0):
         outcomes = []
-        current_best = 0
+        current_best = float("-inf")
         for trail in range(self.trials):
             self.trial = trail
             print(f'Staring trail {trail + 1}')
@@ -47,6 +47,7 @@ class RandomMarioPlayer:
             outcome = self.run_player(player)
             if outcome["performance_score"] > current_best:
                 player.save_player(self.output_dir, f"trail_{trail}")
+                current_best = outcome["performance_score"]
             outcomes.append(outcome)
             print(f"finish {trail + 1} in {time.time() - t}")
 

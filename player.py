@@ -95,7 +95,7 @@ class MarioPlayer:
                 "sum_reward": int(self.sum_reward),
                 "steps_count": self.steps_count,
                 "score": self.score,
-                "lives": self.lives,
+                "lives": int(self.lives),
                 "coins": self.coins,
                 "status": self.status,
                 "did_win": self.did_win,
