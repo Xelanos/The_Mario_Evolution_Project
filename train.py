@@ -33,7 +33,10 @@ def parse_arguments():
     parser.add_argument("-initial_population", "-i_p", dest="initial_population", type=int, default=INITIAL_POP,
                         help="The size of initial population for genetic agent.")
     parser.add_argument("-elite_size", "-e_s", dest="elite_size", type=int, default=ELITE_DEFAULT_SIZE,
-                        help="For genetic agent, the size of the elite to breed for the next generation")
+                        help="For genetic agent, the size of the elite to breed for the next generation.")
+    parser.add_argument("-random_pick_size", "-random_parents", "-random_pick", "-r_p", dest="random_pick_size",
+                        type=int, default=0, help="For genetic agent, the number of members who will randomly picked to"
+                                                  " breed for the next generation.")
     parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
                         help="The maximal frames for a trial.")
     parser.add_argument("-a", "-action_set", dest="action_set", choices=ACTION_SET.keys(), default=DEFAULT_ACTION_SET,
@@ -61,6 +64,8 @@ def parse_arguments():
         parser.error("Initial population size have to be positive.")
     if args.elite_size < 2 or args.elite_size > args.initial_population:
         parser.error("Elite size is smaller then 2 or bigger then the population size.")
+    if args.random_pick_size < 0:
+        parser.error("Random pick size must to be positive.")
     if args.standing_steps_limit < 1:
         parser.error("The limit for standing must be positive.")
     if not args.output_dir:

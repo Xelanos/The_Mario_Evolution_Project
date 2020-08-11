@@ -103,7 +103,7 @@ class MarioBasicPopulationManger(PopulationManger):
         self.gen_number += 1
         elite = self.get_elite()
         print(f'Best fitness : {elite[0].fitness_score}')
-        random_members = list(np.random.choice(self.population, size=self.random_pick_size, replace=False))
+        random_members = list(np.random.choice(self.population, size=min(self.random_pick_size, self.size), replace=False))
         parents = sorted(set(elite + random_members), key=lambda member: member.fitness_score, reverse=True)
         self.population = parents
         self.size = len(self.population)
