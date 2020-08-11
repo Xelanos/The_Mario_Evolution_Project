@@ -1,0 +1,6 @@
+Summary for training human agent on SuperMarioBros-v0.
+Ran for 10 trials with at most 2500 steps per game.
+Limit on no changing the x position is: 200
+Did allow player to die.
+Agent successfully win the level in some games.
+Best performance: trial number 3 with performance score of 16113.162953254698. Finish level with size fireball. Finish in 2289 steps and 0 deaths. Score 6100 and 6 coins.
