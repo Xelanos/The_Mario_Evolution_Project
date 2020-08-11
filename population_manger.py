@@ -10,6 +10,7 @@ import glob
 DEFAULT_POPULATION_SIZE = 150
 ELITE_DEFAULT_SIZE = 2
 RANDOM_PICK_DEFAULT_SIZE = 0
+DEFAULT_RANDOM_MEMBERS = 0
 
 class Member():
     """
@@ -73,7 +74,8 @@ class PopulationManger():
 class MarioBasicPopulationManger(PopulationManger):
 
     def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=len(SIMPLE_MOVEMENT),
-                 elite_size=ELITE_DEFAULT_SIZE, random_pick_size=RANDOM_PICK_DEFAULT_SIZE):
+                 elite_size=ELITE_DEFAULT_SIZE, random_pick_size=RANDOM_PICK_DEFAULT_SIZE,
+                 random_members=DEFAULT_RANDOM_MEMBERS):
         super().__init__(population_size)
         self.num_of_actions = num_of_actions
         self.elite_size = min(max(2, elite_size), self.size)
@@ -82,6 +84,7 @@ class MarioBasicPopulationManger(PopulationManger):
         self.mutation_power = 0.1
         self.tournament_size = 10
         self.random_pick_size = random_pick_size
+        self.random_members = random_members
 
     def init_pop(self):
         # init all members:
@@ -117,6 +120,11 @@ class MarioBasicPopulationManger(PopulationManger):
             self.add_member(new_member2)
             index += 2
             self.size += 2
+        for i in range(self.random_members):
+            player = MarioPlayer(self.num_of_actions)
+            member_name = "member_{index}_gen_{gen_index}".format(index=index + i, gen_index=self.gen_number)
+            self.add_member(Member(player.get_weights(), 0, member_name))
+            self.size += 1
 
     def get_elite(self):
         return sorted(self.population, key=lambda member: member.fitness_score, reverse=True)[:self.elite_size]
@@ -168,6 +176,7 @@ class MarioBasicPopulationManger(PopulationManger):
                           "population_size": self.size,
                           "elite_size": self.elite_size,
                           "random_pick_size": self.random_pick_size,
+                          "random_members": self.random_members,
                           "cross_prob": self.cross_prob,
                           "mutation_rate": self.mutation_rate,
                           "mutation_power": self.mutation_power,
@@ -183,6 +192,7 @@ class MarioBasicPopulationManger(PopulationManger):
             self.num_of_actions = manager_values["num_of_actions"]
             self.elite_size = manager_values["elite_size"]
             self.random_pick_size = manager_values["random_pick_size"]
+            self.random_members = manager_values["random_members"]
             self.cross_prob = manager_values["cross_prob"]
             self.mutation_rate = manager_values["mutation_rate"]
             self.mutation_power = manager_values["mutation_power"]
