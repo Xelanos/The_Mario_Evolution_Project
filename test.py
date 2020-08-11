@@ -5,7 +5,9 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym import Wrapper
 import gym.wrappers.monitor as monitor
+from wrappers import WarpFrame
 import human_playing
+import time
 from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
 from pandas import DataFrame
@@ -111,9 +113,9 @@ def write_summary(args, input_args, output_data_frame: DataFrame):
             steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
 
 
-def run_agent(player: MarioPlayer, env: Wrapper, record: bool, index):
+def run_agent(player: MarioPlayer, env: Wrapper, record: bool, vids_path: str, index):
     if record:
-        rec_output_path = os.path.join(vids_path, "vid", "{name}.mp4".
+        rec_output_path = os.path.join(vids_path, "{name}.mp4".
                                        format(name=index))
         rec = monitor.video_recorder.VideoRecorder(env, path=rec_output_path)
 
@@ -188,13 +190,17 @@ if __name__ == "__main__":
         population_manager.load_population(args.input_dir)
         elite = population_manager.get_elite()
         env = JoypadSpace(env, actions)
+        env = WarpFrame(env)
         outcomes = []
+        print("Stating genetic agent test:")
+        t = time.time()
         for index, member in enumerate(elite):
             print("running member {index} of the elite.".format(index=index))
             player = MarioPlayer(len(actions), member.genes)
-            outcome = run_agent(player, env, args.record, member.get_name())
+            outcome = run_agent(player, env, args.record, vids_path, member.get_name())
             outcomes.append(outcome)
         env.close()
+        print(f"finish test in {time.time() - t}")
         df = DataFrame(outcomes)
     df.to_csv(os.path.join(args.output_dir, "output.csv"))
     write_summary(args, input_args, df)
