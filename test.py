@@ -79,14 +79,15 @@ def write_summary(args, input_args, output_data_frame: DataFrame):
         if args.agent != "human":
             summary_file.write(" with {action_set} action set.\n".format(action_set=input_args["action_set"]))
             summary_file.write("The agent originally was trained with {num_of_loops} {g_or_t} with at most "
-                               "{steps_limit} steps per game. ".format(num_of_loops=input_args["num_of_loops"],
+                               "{steps_limit} steps per game on {env}. ".format(num_of_loops=input_args["num_of_loops"],
                                 g_or_t="generations" if args.agent == "genetic" else "trials",
-                                steps_limit=input_args["steps_limit"]))
-            summary_file.write("{standing_limit} - standing steps limit. {allow_dying} death. ".
+                                steps_limit=input_args["steps_limit"],
+                                env=input_args["env"]))
+            summary_file.write("{standing_limit} - standing steps limit. {allow_dying} death".
                                format(standing_limit=input_args["standing_steps_limit"],
                                 allow_dying="Didn't allowed" if input_args["allow_death"] else "allowed"))
             if args.agent == "genetic":
-                summary_file.write("{i_p} - initial population. {e_s} - Elite size".
+                summary_file.write(". {i_p} - initial population. {e_s} - Elite size".
                                    format(i_p=input_args["initial_population"], e_s=input_args["elite_size"]))
         summary_file.write(".\n")
         summary_file.write("Test ran {steps_limit} steps limit.\n".format(steps_limit=args.steps_limit))
