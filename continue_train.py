@@ -53,5 +53,5 @@ if __name__ == "__main__":
                          allow_death=args_dict["allow_death"],
                          standing_steps_limit=args_dict["standing_steps_limit"],
                          output_dir=OUTPUT_DIR)
-    outcomes = model.continue_run(INPUT_DIR_LAST_GEN ,render_every=RENDER_F, record_every=0)
+    outcomes = model.continue_run(INPUT_DIR_LAST_GEN, render_every=RENDER_F, record_every=0)
     write_summary(args_dict, DataFrame(outcomes))
