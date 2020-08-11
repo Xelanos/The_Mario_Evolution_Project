@@ -35,6 +35,11 @@ MAX_STEPS_PER_GAME = 2000
 _NOP = 0
 # number of initial life
 INITIAL_LIFE = 2
+# weights to values to calculate performance score.
+VALUES_WEIGHTS = np.array([10,  # sum_reward
+                           1,  # score
+                           10000  # did_win
+                           ])
 
 def get_keys_to_action(buttons):
     """
@@ -57,7 +62,7 @@ def get_keys_to_action(buttons):
 
 
 def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_limit: int = NO_ADVANCE_STEP_LIMIT,
-        buttons=BUTTONS, allow_dying=True, record=""):
+        buttons=BUTTONS, values_weights=VALUES_WEIGHTS, allow_dying=True, record=""):
     # ensure the observation space is a box of pixels
     assert isinstance(env.observation_space, gym.spaces.box.Box)
     # ensure the observation space is either B&W pixels or RGB Pixels
@@ -70,8 +75,8 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
     # create the image viewer
     viewer = ImageViewer(
         env.spec.id if env.spec is not None else env.__class__.__name__,
-        env.observation_space.shape[0],  # height
-        env.observation_space.shape[1],  # width
+        env.unwrapped.observation_space.shape[0],  # height
+        env.unwrapped.observation_space.shape[1],  # width
         monitor_keyboard=True,
         relevant_keys=set(sum(map(list, keys_to_action.keys()), []))
     )
@@ -81,7 +86,6 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
     last_x_pos = 0
     same_x_pos_cunt = 0
     reward_sum = 0
-    deaths = 0
     info = dict()
     outcome = dict()
     # record if necessary
@@ -137,10 +141,11 @@ def run(env: nes_py.NESEnv, max_steps: int = MAX_STEPS_PER_GAME, standing_steps_
         if info:
             avg_reward = reward_sum / num_of_steps
             info['life'] = -1 if info['life'] == 255 else info['life']
+            values = np.array([avg_reward, info['score'], 1 if info["flag_get"] else 0])
             outcome = {'avg_reward': avg_reward, 'steps': num_of_steps, 'score': info['score'],
                        'deaths': INITIAL_LIFE - info['life'], 'coins': info['coins'], 'finish_status': info['status'],
-                       'finish_level': info["flag_get"]}
-            print("Done in {} steps. Average reward {}. {} to the flag.".format(num_of_steps, avg_reward,
+                       'finish_level': info["flag_get"], 'performance_score': sum(values*values_weights)}
+            print("Done in {} steps. Average sum_reward {}. {} to the flag.".format(num_of_steps, avg_reward,
                                                                         "Got" if info["flag_get"] else "Didn't got"))
 
     except KeyboardInterrupt:

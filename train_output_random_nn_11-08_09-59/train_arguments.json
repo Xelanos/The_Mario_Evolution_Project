@@ -1,0 +1,1 @@
+{"agent": "random_nn", "output_dir": "train_output_random_nn_11-08_09-59", "num_of_loops": 150, "initial_population": 150, "elite_size": 10, "steps_limit": 2000, "action_set": "simple", "standing_steps_limit": 100, "allow_death": false, "env": "SuperMarioBros-v0"}

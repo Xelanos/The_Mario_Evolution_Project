@@ -1,74 +1,96 @@
+from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
-from population_manger import *
 
 import gym.wrappers.monitor as monitor
+from wrappers import WarpFrame
 
-import traceback
-import pickle
+import time
+from pandas import DataFrame
 
 import os
 import gc
 
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
-from multiprocessing import Pool, cpu_count
 
-TIME_SCALE = 200
+ELITE_DEFAULT_SIZE = 10
+RANDOM_PICK_DEFAULT_SIZE = 10
+DEFAULT_RANDOM_MEMBERS = 10
+TIME_SCALE = 2000
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
+SAVE_POPULATION_MANAGER_EVERY_GENERATION = True
 
 
 class GeneticMario:
 
-    def __init__(self, actions, generations, initial_pop, steps_scale=TIME_SCALE, allow_death=False,
-                 standing_steps_limit = NO_ADVANCE_STEP_LIMIT):
+    def __init__(self, mario_environment, actions, generations, initial_pop, elite_size=ELITE_DEFAULT_SIZE,
+                 random_pick_size=RANDOM_PICK_DEFAULT_SIZE, random_members=DEFAULT_RANDOM_MEMBERS,
+                 steps_scale=TIME_SCALE, allow_death=False, standing_steps_limit=NO_ADVANCE_STEP_LIMIT, output_dir=""):
         self.actions = actions
         self.num_of_actions = len(actions)
         self.generations = generations
-        self.inital_pop = initial_pop
-        self.population = MarioBasicPopulationManger(self.inital_pop)
+        self.initial_pop = initial_pop
+        self.elite_size = elite_size
+        self.random_pick_size = random_pick_size
+        self.random_members = random_members
+        self.population = MarioBasicPopulationManger(self.initial_pop, self.num_of_actions, self.elite_size,
+                                                     self.random_pick_size, self.random_members)
         self.elite = None
         self.generation = 0
         self.steps_scale = steps_scale
         self.allow_death = allow_death
         self.standing_steps_limit = standing_steps_limit
-        self._init_pop()
+        self.record = False
+        self.render = False
+        self.output_dir = output_dir
+        self.current_gen_output_dir = output_dir
+        self.env = mario_environment
 
-    def run(self, render_every=100):
-        try:
-            for gen in range(self.generations):
-                self.generation = gen
-                print(f'Staring generation {gen + 1}')
-                if render_every:
-                    self.render = (gen % render_every == 0)
-                else:
-                    self.render = False
-                pool = Pool()
-                members = pool.map_async(self.run_player, self.population).get()
-                pool.close()
-                pool.join()
-                for member in members:
-                    self.population.add_member(member)
-                self.population = self.population.make_next_generation()
-                gc.collect()
-            self._save()
-        except Exception as e:
-            self._save()
-            traceback.print_exc(e)
-            return
+    def run(self, render_every=100, record_every=0):
+        outcomes = []
+        print("Initializing the first generation with random weights.")
+        self.population.init_pop()
+        for gen in range(self.generations):
+            self.generation = gen
+            print(f'Staring generation {gen + 1}')
+            t = time.time()
+            self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen+1))
+            if not os.path.isdir(self.current_gen_output_dir):
+                os.mkdir(self.current_gen_output_dir)
 
-    def run_player(self, member, record=False, render=True):
-        env = gym_super_mario_bros.make('SuperMarioBros-v0')
+            self.render = (gen % render_every == 0) if render_every else False
+            self.record = (gen % record_every == 0) if record_every else False
+            if self.record:
+                if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
+                    os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
+            gen_outcomes = []
+            for member in self.population:
+                outcome = self.run_player(member)
+                gen_outcomes.append(outcome)
+                outcomes.append(outcome)
+            self._save_generation_outcome(gen_outcomes)
+            print(f"finish {gen + 1} in {time.time() - t}")
+            if gen != self.generations - 1:
+                self.population.make_next_generation()
+            gc.collect()
+
+        self._save(outcomes)
+        return outcomes
+
+    def run_player(self, member):
+        env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
+        env = WarpFrame(env)
         player = MarioPlayer(self.num_of_actions, member.genes)
 
-        if record:
-            if not os.path.isdir("vid"):
-                os.mkdir("vid")
-            rec = monitor.video_recorder.VideoRecorder(env, path=f"vid/gen.mp4")
-        env.reset()
+        if self.record:
+            rec_output_path = os.path.join(self.current_gen_output_dir, "vid", "{name}.mp4".
+                                           format(name=member.get_name()))
+            rec = monitor.video_recorder.VideoRecorder(env, path=rec_output_path)
+
+        state = env.reset()
         done = False
-        action = 0
 
         last_x_pos = 0
         same_x_pos_cunt = 0
@@ -76,12 +98,16 @@ class GeneticMario:
         for step in range(self.steps_scale):
             if done:
                 break
-            state, reward, done, info = env.step(action)
-            if record:
-                rec.capture_frame()
             action = player.act(state)
+            state, reward, done, info = env.step(action)
+
+            if self.record:
+                rec.capture_frame()
+            if self.render:
+                env.render()
+
             player.update_info(info)
-            player.reward += reward
+            player.update_reward(reward)
             if last_x_pos == info['x_pos']:
                 same_x_pos_cunt += 1
             else:
@@ -93,31 +119,59 @@ class GeneticMario:
                 done = True
             if info['flag_get']:  # if got to the flag - run is ended.
                 done = True
-            if self.render:
-                env.render()
-        if record:
+
+        if self.record:
             rec.close()
         env.close()
-        return Member(player.get_weights(), player.calculate_fittness())
+        member.set_fitness_score(player.calculate_fitness())
+        outcome = player.get_run_info()
+        outcome['generation'] = self.generation
+        outcome['index'] = member.get_name()
+        return outcome
+
+    def _save_generation_outcome(self, outcomes):
+        df = DataFrame(outcomes)
+        df.to_csv(os.path.join(self.current_gen_output_dir, "gen_{}_output.csv".format(self.generation)))
+        if SAVE_POPULATION_MANAGER_EVERY_GENERATION:
+            self.population.save_population(self.current_gen_output_dir)
+
+    def _save(self, outcomes):
+        df = DataFrame(outcomes)
+        df.to_csv(os.path.join(self.output_dir, "genetic_output.csv"))
+        self.population.save_population(self.output_dir)
+
+    def continue_run(self, input_dir, render_every=100, record_every=0):
+        outcomes = []
+        self.population.load_population(input_dir)
+        print("Loading completed. Continue run.")
+        self.population.make_next_generation()
+        self.generation = self.population.gen_number
+        for gen in range(self.generations):
+            self.generation = gen
+            print(f'Staring generation {gen + 1}')
+            t = time.time()
+            self.current_gen_output_dir = os.path.join(self.output_dir, "gen_{}".format(gen + 1))
+            if not os.path.isdir(self.current_gen_output_dir):
+                os.mkdir(self.current_gen_output_dir)
+
+            self.render = (gen % render_every == 0) if render_every else False
+            self.record = (gen % record_every == 0) if record_every else False
+            if self.record:
+                if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
+                    os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
+            gen_outcomes = []
+            for member in self.population:
+                outcome = self.run_player(member)
+                gen_outcomes.append(outcome)
+                outcomes.append(outcome)
+            self._save_generation_outcome(gen_outcomes)
+            print(f"finish {gen + 1} in {time.time() - t}")
+            if gen != self.generations - 1:
+                self.population.make_next_generation()
+            gc.collect()
+
+        self._save(outcomes)
+        return outcomes
 
 
-    def _init_pop(self):
-        weights = Pool(processes=1).map(self._init_population_player, range(self.inital_pop))
-        for w in weights:
-            self.population.add_member(Member(w, 0))
-
-
-    def _init_population_player(self, i):
-        p = MarioPlayer(self.num_of_actions)
-        return p.get_weights()
-
-    def _save(self):
-        if not os.path.isdir("saved"):
-            os.mkdir("saved")
-
-        with open("saved/saved_gen.pic", 'wb') as f:
-            pickle.dump(self.generation, f)
-
-        with open("saved/saved_pop.pic", 'wb') as f:
-            pickle.dump(self.population, f)
 
