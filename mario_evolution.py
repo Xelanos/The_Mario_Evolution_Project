@@ -3,7 +3,6 @@ from population_manger import *
 import gym.wrappers.monitor as monitor
 from wrappers import WarpFrame
 
-import traceback
 import time
 from pandas import DataFrame
 
