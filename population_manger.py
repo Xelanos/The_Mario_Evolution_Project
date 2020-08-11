@@ -9,7 +9,7 @@ import glob
 
 DEFAULT_POPULATION_SIZE = 150
 ELITE_DEFAULT_SIZE = 2
-
+RANDOM_PICK_DEFAULT_SIZE = 0
 
 class Member():
     """
@@ -73,7 +73,7 @@ class PopulationManger():
 class MarioBasicPopulationManger(PopulationManger):
 
     def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=len(SIMPLE_MOVEMENT),
-                 elite_size=ELITE_DEFAULT_SIZE):
+                 elite_size=ELITE_DEFAULT_SIZE, random_pick_size=RANDOM_PICK_DEFAULT_SIZE):
         super().__init__(population_size)
         self.num_of_actions = num_of_actions
         self.elite_size = min(max(2, elite_size), self.size)
@@ -81,6 +81,7 @@ class MarioBasicPopulationManger(PopulationManger):
         self.mutation_rate = 0.80 - (0.0006 * self.gen_number)
         self.mutation_power = 0.1
         self.tournament_size = 10
+        self.random_pick_size = random_pick_size
 
     def init_pop(self):
         # init all members:
@@ -102,7 +103,9 @@ class MarioBasicPopulationManger(PopulationManger):
         self.gen_number += 1
         elite = self.get_elite()
         print(f'Best fitness : {elite[0].fitness_score}')
-        self.population = elite
+        random_members = list(np.random.choice(self.population, size=self.random_pick_size, replace=False))
+        parents = sorted(set(elite + random_members), key=lambda member: member.fitness_score, reverse=True)
+        self.population = parents
         self.size = len(self.population)
         self.mutation_rate -= (0.0006 * self.gen_number)
         index = 0
