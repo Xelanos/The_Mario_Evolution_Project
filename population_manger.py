@@ -112,7 +112,7 @@ class MarioBasicPopulationManger(PopulationManger):
         self.size = len(self.population)
         self.mutation_rate -= (0.0006 * self.gen_number)
         index = 0
-        for parent1, parent2 in combinations(elite, 2):
+        for parent1, parent2 in combinations(parents, 2):
             new_member1, new_member2 = self.breed(parent1, parent2)
             new_member1.set_name("member_{index}_gen_{gen_index}".format(index=index, gen_index=self.gen_number))
             self.add_member(new_member1)
