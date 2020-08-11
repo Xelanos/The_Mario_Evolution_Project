@@ -90,9 +90,9 @@ class MarioPlayer:
     def save_player(self, output_dir, name):
         weights = self.model.get_weights()
         info = {"fitness": self.calculate_fitness(),
-                "farthest_x": self.farthest_x,
-                "farthest_x_time": self.farthest_x_time,
-                "sum_reward": self.sum_reward,
+                "farthest_x": int(self.farthest_x),
+                "farthest_x_time": int(self.farthest_x_time),
+                "sum_reward": int(self.sum_reward),
                 "steps_count": self.steps_count,
                 "score": self.score,
                 "lives": self.lives,

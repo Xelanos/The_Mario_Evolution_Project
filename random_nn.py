@@ -47,6 +47,7 @@ class RandomMarioPlayer:
             outcome = self.run_player(player)
             if outcome["performance_score"] > current_best:
                 player.save_player(self.output_dir, f"trail_{trail}")
+            outcomes.append(outcome)
             print(f"finish {trail + 1} in {time.time() - t}")
 
         DataFrame(outcomes).to_csv(os.path.join(self.output_dir, "random_output.csv"))

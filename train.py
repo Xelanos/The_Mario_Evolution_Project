@@ -6,13 +6,14 @@ from pandas import DataFrame
 import gym_super_mario_bros
 from gym_super_mario_bros import actions
 from mario_evolution import GeneticMario
+from random_nn import RandomMarioPlayer
 import human_playing
 
 
 DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
 DEFAULT_STEP_LIMIT = 2000
 DEFAULT_NO_ADVANCE_STEP_LIMIT = 100
-AGENTS = ['human', 'genetic']
+AGENTS = ['human', 'genetic', "random_nn"]
 ACTION_SET = {"right_only": actions.RIGHT_ONLY, "simple": actions.SIMPLE_MOVEMENT, "complex": actions.COMPLEX_MOVEMENT}
 DEFAULT_ACTION_SET = "simple"
 TRIALS = 10
@@ -110,7 +111,7 @@ def write_summary(args, output_data_frame: DataFrame):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
             summary_file.write("Agent failed to win any games.\n")
-        if args.agent == "human":
+        if args.agent == "human" or args.agent == "random_nn":
             best_result_index = output_data_frame['performance_score'].idxmax()
             info = output_data_frame.iloc[best_result_index]
             summary_file.write("Best performance: trial number {best_index} with performance score of"
@@ -167,6 +168,20 @@ if __name__ == "__main__":
                              allow_death=args.allow_dying,
                              standing_steps_limit=args.standing_steps_limit,
                              output_dir=args.output_dir)
+        if args.record == RECORDE_OPTIONS[0]:
+            record_frequency = 0
+        else:
+            record_frequency = args.record_frequency if args.record == RECORDE_OPTIONS[1] else 1
+        outcomes = model.run(render_every=args.render, record_every=record_frequency)
+        write_summary(args, DataFrame(outcomes))
+    elif args.agent == "random_nn":
+        model = RandomMarioPlayer(mario_environment=args.env,
+                                  actions=ACTION_SET[args.action_set],
+                                  trials=args.loop_times,
+                                  steps_scale=args.steps_limit,
+                                  allow_death=args.allow_dying,
+                                  standing_steps_limit=args.standing_steps_limit,
+                                  output_dir=args.output_dir)
         if args.record == RECORDE_OPTIONS[0]:
             record_frequency = 0
         else:
