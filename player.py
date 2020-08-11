@@ -1,4 +1,5 @@
 import os
+import json
 from wrappers import DEFAULT_WARP_FRAME_HEIGHT,DEFAULT_WARP_FRAME_WIDTH
 
 INITIAL_LIFE = 2
@@ -85,6 +86,46 @@ class MarioPlayer:
 
     def get_weights(self):
         return self.model.get_weights()
+
+    def save_player(self, output_dir, name):
+        weights = self.model.get_weights()
+        info = {"fitness": self.calculate_fitness(),
+                "farthest_x": self.farthest_x,
+                "farthest_x_time": self.farthest_x_time,
+                "sum_reward": self.sum_reward,
+                "steps_count": self.steps_count,
+                "score": self.score,
+                "lives": self.lives,
+                "coins": self.coins,
+                "status": self.status,
+                "did_win": self.did_win,
+                "weights_path": os.path.join(output_dir, name + ".npz"),
+                "weights_len": len(weights)}
+        np.savez_compressed(os.path.join(output_dir, name), *weights)
+        with open(os.path.join(output_dir, name + "_info.json"), 'w') as f:
+            json.dump(info, f)
+
+    def load_player(self, input_json_path):
+        with open(input_json_path, 'r') as f:
+            info = json.load(f)
+            self.fitness = info["fitness"]
+            self.farthest_x = info["farthest_x"]
+            self.farthest_x_time = info["farthest_x_time"]
+            self.sum_reward = info["sum_reward"]
+            self.steps_count = info["steps_count"]
+            self.score = info["score"]
+            self.lives = info["lives"]
+            self.coins = info["coins"]
+            self.status = info["status"]
+            self.did_win = info["did_win"]
+            loaded_weights = np.load(info["weights_path"])
+            weights = []
+            for i in range(info["weights_len"]):
+                weights.append(loaded_weights["arr_" + str(i)])
+            self.model.set_weights(weights)
+
+
+
 
 
 

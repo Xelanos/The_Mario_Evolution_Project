@@ -13,7 +13,7 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 
 ELITE_DEFAULT_SIZE = 10
-TIME_SCALE = 200
+TIME_SCALE = 2000
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
 SAVE_POPULATION_MANAGER_EVERY_GENERATION = False
