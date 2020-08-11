@@ -1,0 +1,6 @@
+Summary for training random_nn agent on SuperMarioBros-v0 with simple action set.
+Ran for 150 trials with at most 2000 steps per game.
+Limit on no changing the x position is: 100
+Did allow player to die.
+Agent failed to win any games.
+Best performance: trial number 102 with performance score of 419.20353982300884. Finish in 339 steps and 1 deaths. Score 400 and 2 coins.

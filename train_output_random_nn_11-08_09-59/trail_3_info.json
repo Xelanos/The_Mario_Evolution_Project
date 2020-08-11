@@ -1,0 +1,1 @@
+{"fitness": 23.551401869158877, "farthest_x": 315, "farthest_x_time": 395, "sum_reward": 252, "steps_count": 107, "score": 0, "lives": 1, "coins": 0, "status": "small", "did_win": false, "weights_path": "train_output_random_nn_11-08_09-59\\trail_3.npz", "weights_len": 10}
