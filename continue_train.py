@@ -4,9 +4,9 @@ import train
 from pandas import DataFrame
 from mario_evolution import GeneticMario
 
-INPUT_DIR = "input"
-INPUT_DIR_LAST_GEN = "input\gen_1"
-OUTPUT_DIR = "output"
+INPUT_DIR = "train_output_genetic_11-08_17-30"
+INPUT_DIR_LAST_GEN = "train_output_genetic_11-08_17-30\gen_25"
+OUTPUT_DIR = "train_output_genetic_11-08_17-30"
 RENDER_F = 0
 
 
