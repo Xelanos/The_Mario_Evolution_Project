@@ -31,7 +31,7 @@ def parse_arguments():
     parser.add_argument("-n", "-num_of_trials", "-g", "-generations", dest='loop_times', type=int, default=TRIALS,
                         help="Number of trials or generations to run.")
     parser.add_argument("-initial_population", "-i_p", dest="initial_population", type=int, default=INITIAL_POP,
-                        help="The size of initial population for genetic agent.")
+                        help="For genetic agent, the size of initial population for genetic agent.")
     parser.add_argument("-elite_size", "-e_s", dest="elite_size", type=int, default=ELITE_DEFAULT_SIZE,
                         help="For genetic agent, the size of the elite to breed for the next generation.")
     parser.add_argument("-random_pick_size", "-random_parents", "-random_pick", "-r_p", dest="random_pick_size",
