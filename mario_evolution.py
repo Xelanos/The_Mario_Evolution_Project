@@ -2,10 +2,11 @@ from population_manger import MarioBasicPopulationManger
 from player import MarioPlayer
 
 import gym.wrappers.monitor as monitor
-from wrappers import WarpFrame
+from wrappers import *
 
 import time
 from pandas import DataFrame
+from multiprocessing import Pool
 
 import os
 import gc
@@ -65,6 +66,7 @@ class GeneticMario:
                 if not os.path.isdir(os.path.join(self.current_gen_output_dir, "vid")):
                     os.mkdir(os.path.join(self.current_gen_output_dir, "vid"))
             gen_outcomes = []
+            # outcomes = Pool(3).map_async(self.run_player, self.population).get()
             for member in self.population:
                 outcome = self.run_player(member)
                 gen_outcomes.append(outcome)
@@ -82,6 +84,7 @@ class GeneticMario:
         env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
         player = MarioPlayer(self.num_of_actions, member.genes)
 
         if self.record:

@@ -33,10 +33,8 @@ class MarioPlayer:
 
     def act(self, state):
         if state is not None:
-            #grayscale_stat = tf.image.rgb_to_grayscale(state)
-            #grayscale_stat = tf.keras.backend.expand_dims(grayscale_stat, axis=0)
-            grayscale_stat = tf.keras.backend.expand_dims(state, axis=0)
-            actions = self.model.predict(grayscale_stat, batch_size=1)
+            state = tf.keras.backend.expand_dims(state, axis=0)
+            actions = self.model.predict(state, batch_size=1)
             action = np.argmax(actions)
         else:
             action = DEFAULT_ACTION
@@ -63,22 +61,24 @@ class MarioPlayer:
                 'deaths': INITIAL_LIFE - self.lives, 'coins': self.coins, 'finish_status': self.status,
                 'finish_level': self.did_win, 'performance_score': self.calculate_fitness()}
 
-    def calculate_fitness(self, values_weights=np.array([10, 1, 10000])):
+    def calculate_fitness(self, values_weights=np.array([10, 1, 10000, -800])):
         avg_reward = self.sum_reward / self.steps_count if self.steps_count else 0
+        died = self.lives < INITIAL_LIFE
         # self.fitness = avg_reward
         # return avg_reward
-        values = np.array([avg_reward, self.score, 1 if self.did_win else 0])
+        values = np.array([avg_reward, self.score, 1 if self.did_win else 0, 1 if died else 0])
         return sum(values*values_weights)
 
     def _make_model(self, number_of_actions, weights):
+        random_uniform_init = tf.keras.initializers.RandomUniform(minval=-1, maxval=1)
         model = tf.keras.Sequential([
-                tf.keras.layers.Input(shape=(DEFAULT_WARP_FRAME_HEIGHT, DEFAULT_WARP_FRAME_WIDTH, 1)),
-                tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=4, activation=tf.nn.swish, bias_initializer='random_normal'),
-                tf.keras.layers.Conv2D(filters=64, kernel_size=4, strides=2, activation=tf.nn.swish,  bias_initializer='random_normal'),
-                tf.keras.layers.Conv2D(filters=64, kernel_size=3, strides=1, activation=tf.nn.swish,  bias_initializer='random_normal'),
+                tf.keras.layers.Input(shape=(DEFAULT_WARP_FRAME_HEIGHT, DEFAULT_WARP_FRAME_WIDTH, 4)),
+                tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=4, padding='same', activation=tf.keras.layers.LeakyReLU(), bias_initializer=random_uniform_init, kernel_initializer=random_uniform_init),
+                tf.keras.layers.Conv2D(filters=64, kernel_size=4, strides=2, padding='same', activation=tf.keras.layers.LeakyReLU(),  bias_initializer=random_uniform_init, kernel_initializer=random_uniform_init),
+                tf.keras.layers.Conv2D(filters=64, kernel_size=3, strides=1, padding='same', activation=tf.keras.layers.LeakyReLU(),  bias_initializer=random_uniform_init, kernel_initializer=random_uniform_init),
                 tf.keras.layers.Flatten(),
-                tf.keras.layers.Dense(512, activation=tf.nn.swish, bias_initializer='random_normal'),
-                tf.keras.layers.Dense(number_of_actions, activation=tf.nn.softmax, bias_initializer='random_normal')
+                tf.keras.layers.Dense(512, activation=tf.nn.relu, bias_initializer=random_uniform_init, kernel_initializer=random_uniform_init),
+                tf.keras.layers.Dense(number_of_actions, activation=tf.nn.softmax, bias_initializer=random_uniform_init, kernel_initializer=random_uniform_init)
             ])
         if weights is not None:
             model.set_weights(weights)
