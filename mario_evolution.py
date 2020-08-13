@@ -136,12 +136,16 @@ class GeneticMario:
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(self.current_gen_output_dir, "gen_{}_output.csv".format(self.generation)))
         if SAVE_POPULATION_MANAGER_EVERY_GENERATION:
-            self.population.save_population(self.current_gen_output_dir)
+            self.population.save_population(self.current_gen_output_dir)  # save the current one
+            MarioBasicPopulationManger.delete_saved_population(os.path.join(self.output_dir, f"gen_{self.generation}"))
+            # delete the previous one
 
     def _save(self, outcomes):
         df = DataFrame(outcomes)
         df.to_csv(os.path.join(self.output_dir, "genetic_output.csv"))
         self.population.save_population(self.output_dir)
+        if SAVE_POPULATION_MANAGER_EVERY_GENERATION:
+            MarioBasicPopulationManger.delete_saved_population(self.current_gen_output_dir)
 
     def continue_run(self, input_dir, render_every=100, record_every=0):
         outcomes = []
