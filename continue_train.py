@@ -4,9 +4,9 @@ import train
 from pandas import DataFrame
 from mario_evolution import GeneticMario
 
-INPUT_DIR = "train_output_genetic_11-08_17-30"
-INPUT_DIR_LAST_GEN = "train_output_genetic_11-08_17-30\gen_25"
-OUTPUT_DIR = "train_output_genetic_11-08_17-30"
+INPUT_DIR = "train_output_genetic_13-08_22-09"
+INPUT_DIR_LAST_GEN = "train_output_genetic_13-08_22-09\gen_1"
+OUTPUT_DIR = "train_output_genetic_13-08_22-09"
 RENDER_F = 0
 
 
@@ -19,10 +19,14 @@ def write_summary(args_dict, output_data_frame: DataFrame):
         summary_file.write("Limit on no changing the x position is: {standing_limit}\n"
                            "{allow_dying} allow player to die.\n".format(standing_limit=args_dict["standing_steps_limit"],
                                                                 allow_dying="Didn't" if args_dict["allow_death"] else "Did"))
-        summary_file.write("Initial population is: {i_p}\n"
+        if args.agent == "genetic":
+            summary_file.write("Initial population is: {i_p}\n"
                                "Elite size is: {e_s}\n"
-                               "Random pick size is {r_p}".format(i_p=args_dict["initial_population"], e_s=args_dict["elite_size"],
-                                                                  r_p=args_dict["pick_size"]))
+                               "pick size is {p}\n"
+                               "Random members number is {r_m}\n".format(i_p=args_dict["initial_population"],
+                                                                         e_s=args_dict["elite_size"],
+                                                                         p=args_dict["pick_size"],
+                                                                         r_m=args_dict["random_members"]))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -39,6 +43,7 @@ def write_summary(args_dict, output_data_frame: DataFrame):
             summary_file.write("Finish level with size {size}. ".format(size=info['finish_status']))
         summary_file.write("Finish in {steps} steps and {deaths} deaths. Score {score} and {coins} coins.\n".format(
             steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
+
 
 if __name__ == "__main__":
     with open(os.path.join(INPUT_DIR, "train_arguments.json"), "r") as arguments_file:
