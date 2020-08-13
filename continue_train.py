@@ -48,7 +48,7 @@ if __name__ == "__main__":
                          generations=args_dict['num_of_loops'],
                          initial_pop=args_dict["initial_population"],
                          elite_size=args_dict["elite_size"],
-                         random_pick_size=args_dict["pick_size"],
+                         pick_size=args_dict["pick_size"],
                          steps_scale=args_dict["steps_limit"],
                          allow_death=args_dict["allow_death"],
                          standing_steps_limit=args_dict["standing_steps_limit"],

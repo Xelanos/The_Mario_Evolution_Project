@@ -102,7 +102,7 @@ class MarioBasicPopulationManger(PopulationManger):
         return tournament[i if i < self.tournament_size else self.tournament_size - 1]
 
     def make_next_generation(self):
-        average_fitness = sum(member.fitness_score for member in self.population)/ len(self.population)
+        average_fitness = sum(member.fitness_score for member in self.population) / len(self.population)
         print(f'Average fitness this gen : {average_fitness}')
         self.gen_number += 1
         elite = self.get_elite()

@@ -15,8 +15,8 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 
 ELITE_DEFAULT_SIZE = 10
-RANDOM_PICK_DEFAULT_SIZE = 10
-DEFAULT_RANDOM_MEMBERS = 10
+PICK_DEFAULT_SIZE = 10
+DEFAULT_RANDOM_MEMBERS = 0
 TIME_SCALE = 2000
 INITIAL_LIFE = 2
 NO_ADVANCE_STEP_LIMIT = 100
@@ -26,17 +26,17 @@ SAVE_POPULATION_MANAGER_EVERY_GENERATION = True
 class GeneticMario:
 
     def __init__(self, mario_environment, actions, generations, initial_pop, elite_size=ELITE_DEFAULT_SIZE,
-                 random_pick_size=RANDOM_PICK_DEFAULT_SIZE, random_members=DEFAULT_RANDOM_MEMBERS,
+                 pick_size=PICK_DEFAULT_SIZE, random_members=DEFAULT_RANDOM_MEMBERS,
                  steps_scale=TIME_SCALE, allow_death=False, standing_steps_limit=NO_ADVANCE_STEP_LIMIT, output_dir=""):
         self.actions = actions
         self.num_of_actions = len(actions)
         self.generations = generations
         self.initial_pop = initial_pop
         self.elite_size = elite_size
-        self.random_pick_size = random_pick_size
+        self.pick_size = pick_size
         self.random_members = random_members
         self.population = MarioBasicPopulationManger(self.initial_pop, self.num_of_actions, self.elite_size,
-                                                     self.random_pick_size, self.random_members)
+                                                     self.pick_size, self.random_members)
         self.elite = None
         self.generation = 0
         self.steps_scale = steps_scale
