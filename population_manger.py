@@ -113,13 +113,11 @@ class MarioBasicPopulationManger(PopulationManger):
         self.mutation_rate -= (0.0006 * self.gen_number)
         index = 0
         for parent1, parent2 in combinations(parents, 2):
-            new_member1, new_member2 = self.breed(parent1, parent2)
-            new_member1.set_name("member_{index}_gen_{gen_index}".format(index=index, gen_index=self.gen_number))
-            self.add_member(new_member1)
-            new_member2.set_name("member_{index}_gen_{gen_index}".format(index=index+1, gen_index=self.gen_number))
-            self.add_member(new_member2)
-            index += 2
-            self.size += 2
+            new_member = self.breed(parent1, parent2)
+            new_member.set_name("member_{index}_gen_{gen_index}".format(index=index, gen_index=self.gen_number))
+            self.add_member(new_member)
+            index += 1
+            self.size += 1
         for i in range(self.random_members):
             player = MarioPlayer(self.num_of_actions)
             member_name = "member_{index}_gen_{gen_index}".format(index=index + i, gen_index=self.gen_number)
@@ -130,25 +128,17 @@ class MarioBasicPopulationManger(PopulationManger):
         return sorted(self.population, key=lambda member: member.fitness_score, reverse=True)[:self.elite_size]
 
     def breed(self, first_member, second_member):
-        new_weights1 = []
-        new_weights2 = []
-        cross_prob = 0.5
+        new_weights = []
+        cross_prob = first_member.fitness_score / sum(first_member.fitness_score, second_member.fitness_score)
         for weights1, weights2 in zip(first_member.genes, second_member.genes):
-            new1 = copy.deepcopy(weights1)
-            new2 = copy.deepcopy(weights2)
+            new = copy.deepcopy(weights1)
             i = np.random.rand(*weights1.shape) > cross_prob
-            new1[i] = weights2[i]
-            new2[i] = weights1[i]
-            new_weights1.append(new1)
-            new_weights2.append(new2)
-
-        child1 = Member(new_weights1)
-        child2 = Member(new_weights2)
+            new[i] = weights2[i]
+            new_weights.append(new)
+        child = Member(new_weights)
         if np.random.uniform() < self.mutation_rate:
-            self.mutate(child1)
-        if np.random.uniform() < self.mutation_rate:
-            self.mutate(child2)
-        return child1, child2
+            self.mutate(child)
+        return child
 
     def mutate(self, member):
         new_weights = []
