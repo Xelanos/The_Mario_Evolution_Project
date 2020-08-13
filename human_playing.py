@@ -15,6 +15,7 @@ import itertools
 import time
 from pyglet import clock
 from nes_py._image_viewer import ImageViewer
+from player import MarioPlayer
 
 # keyboard keys in an array ordered by their byte order in the bitmap
 # i.e. right = 7, left = 6, ..., B = 1, A = 0
@@ -36,10 +37,7 @@ _NOP = 0
 # number of initial life
 INITIAL_LIFE = 2
 # weights to values to calculate performance score.
-VALUES_WEIGHTS = np.array([10,  # sum_reward
-                           1,  # score
-                           10000  # did_win
-                           ])
+VALUES_WEIGHTS = MarioPlayer.FITNESS_WEIGHTS
 
 def get_keys_to_action(buttons):
     """

@@ -17,6 +17,11 @@ initializer = tf.keras.initializers.RandomUniform(minval=-1, maxval=1)
 
 
 class MarioPlayer:
+    FITNESS_WEIGHTS = np.array([10,  # avg_reward
+                                1,  # score
+                                10000,  # did_win
+                                -800  # died
+                                ])
 
     def __init__(self, number_of_actions, weights=None):
         self.model = self._make_model(number_of_actions, weights)
@@ -61,7 +66,7 @@ class MarioPlayer:
                 'deaths': INITIAL_LIFE - self.lives, 'coins': self.coins, 'finish_status': self.status,
                 'finish_level': self.did_win, 'performance_score': self.calculate_fitness()}
 
-    def calculate_fitness(self, values_weights=np.array([10, 1, 10000, -800])):
+    def calculate_fitness(self, values_weights=FITNESS_WEIGHTS):
         avg_reward = self.sum_reward / self.steps_count if self.steps_count else 0
         died = self.lives < INITIAL_LIFE
         # self.fitness = avg_reward
