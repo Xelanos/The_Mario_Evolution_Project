@@ -90,7 +90,7 @@ def write_summary(args, input_args, output_data_frame: DataFrame):
                 summary_file.write(". {i_p} - initial population. {e_s} - Elite size. {r_p} - random pick size. "
                                    "{r_m} - random members number".
                                    format(i_p=input_args["initial_population"], e_s=input_args["elite_size"],
-                                          r_p=input_args["random_pick_size"], r_m=input_args["random_members"]))
+                                          r_p=input_args["pick_size"], r_m=input_args["random_members"]))
         summary_file.write(".\n")
         summary_file.write("Test ran {steps_limit} steps limit.\n".format(steps_limit=args.steps_limit))
         if any(output_data_frame['finish_level']):

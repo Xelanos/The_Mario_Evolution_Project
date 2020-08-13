@@ -9,7 +9,7 @@ import glob
 
 DEFAULT_POPULATION_SIZE = 150
 ELITE_DEFAULT_SIZE = 2
-RANDOM_PICK_DEFAULT_SIZE = 0
+PICK_DEFAULT_SIZE = 10
 DEFAULT_RANDOM_MEMBERS = 0
 
 class Member():
@@ -74,7 +74,7 @@ class PopulationManger():
 class MarioBasicPopulationManger(PopulationManger):
 
     def __init__(self, population_size=DEFAULT_POPULATION_SIZE, num_of_actions=len(SIMPLE_MOVEMENT),
-                 elite_size=ELITE_DEFAULT_SIZE, random_pick_size=RANDOM_PICK_DEFAULT_SIZE,
+                 elite_size=ELITE_DEFAULT_SIZE, pick_size=PICK_DEFAULT_SIZE,
                  random_members=DEFAULT_RANDOM_MEMBERS):
         super().__init__(population_size)
         self.num_of_actions = num_of_actions
@@ -82,8 +82,8 @@ class MarioBasicPopulationManger(PopulationManger):
         self.cross_prob = 0.5
         self.mutation_rate = 0.80 - (0.0006 * self.gen_number)
         self.mutation_power = 0.1
-        self.tournament_size = 10
-        self.random_pick_size = random_pick_size
+        self.tournament_size = 20
+        self.pick_size = pick_size
         self.random_members = random_members
 
     def init_pop(self):
@@ -94,7 +94,7 @@ class MarioBasicPopulationManger(PopulationManger):
             self.add_member(Member(player.get_weights(), 0, member_name))
 
     def pick_from_population(self):
-        tournament = np.random.choice(self.population, size=self.tournament_size)
+        tournament = np.random.choice(self.population, size=min(self.tournament_size, self.size), replace=False)
         tournament = sorted(tournament, reverse=True, key=lambda member: member.fitness_score)
         i = np.random.geometric(0.8, size=1)[0]
         i -= 1  # because geometric is from 1 and we want from 0
@@ -106,8 +106,8 @@ class MarioBasicPopulationManger(PopulationManger):
         self.gen_number += 1
         elite = self.get_elite()
         print(f'Best fitness : {elite[0].fitness_score}')
-        random_members = list(np.random.choice(self.population, size=min(self.random_pick_size, self.size), replace=False))
-        parents = sorted(set(elite + random_members), key=lambda member: member.fitness_score, reverse=True)
+        parents = [self.pick_from_population() for _ in range(self.pick_size)]
+        parents = sorted(set(elite + parents), key=lambda member: member.fitness_score, reverse=True)
         self.population = parents
         self.size = len(self.population)
         self.mutation_rate -= (0.0006 * self.gen_number)
@@ -167,7 +167,7 @@ class MarioBasicPopulationManger(PopulationManger):
                           "num_of_actions": self.num_of_actions,
                           "population_size": self.size,
                           "elite_size": self.elite_size,
-                          "random_pick_size": self.random_pick_size,
+                          "pick_size": self.pick_size,
                           "random_members": self.random_members,
                           "cross_prob": self.cross_prob,
                           "mutation_rate": self.mutation_rate,
@@ -183,7 +183,7 @@ class MarioBasicPopulationManger(PopulationManger):
             self.size = manager_values["population_size"]
             self.num_of_actions = manager_values["num_of_actions"]
             self.elite_size = manager_values["elite_size"]
-            self.random_pick_size = manager_values["random_pick_size"]
+            self.pick_size = manager_values["pick_size"]
             self.random_members = manager_values["random_members"]
             self.cross_prob = manager_values["cross_prob"]
             self.mutation_rate = manager_values["mutation_rate"]

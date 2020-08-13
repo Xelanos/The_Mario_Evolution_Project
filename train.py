@@ -34,7 +34,7 @@ def parse_arguments():
                         help="For genetic agent, the size of initial population for genetic agent.")
     parser.add_argument("-elite_size", "-e_s", dest="elite_size", type=int, default=ELITE_DEFAULT_SIZE,
                         help="For genetic agent, the size of the elite to breed for the next generation.")
-    parser.add_argument("-random_pick_size", "-random_parents", "-random_pick", "-r_p", dest="random_pick_size",
+    parser.add_argument("-pick_size", "-random_parents", "-random_pick", "-r_p", dest="pick_size",
                         type=int, default=0, help="For genetic agent, the number of members who will randomly picked to"
                                                   " breed for the next generation.")
     parser.add_argument("-random_members", "-r_m", dest="random_members", default=0, type=int, help="For genetic agent,"
@@ -93,7 +93,7 @@ def save_args_file(args):
                      "num_of_loops": args.loop_times,
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
-                     "random_pick_size": args.random_pick_size,
+                     "pick_size": args.pick_size,
                      "random_members": args.random_members,
                      "steps_limit": args.steps_limit,
                      "action_set": args.action_set,
@@ -120,9 +120,9 @@ def write_summary(args, output_data_frame: DataFrame):
                                "Elite size is: {e_s}\n"
                                "Random pick size is {r_p}\n"
                                "Random members number is {r_m}\n".format(i_p=args.initial_population,
-                                                                e_s=args.elite_size,
-                                                                r_p=args.random_pick_size,
-                                                                r_m=args.random_members))
+                                                                         e_s=args.elite_size,
+                                                                         r_p=args.pick_size,
+                                                                         r_m=args.random_members))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
