@@ -209,7 +209,14 @@ class MarioBasicPopulationManger(PopulationManger):
                 member.mating_probability = member_info["mating_probability"]
                 self.add_member(member)
 
-
+    @staticmethod
+    def delete_saved_population(input_dir):
+        files_to_delete = glob.glob(input_dir + os.sep + "*info.json")
+        files_to_delete += glob.glob(input_dir + os.sep + "*genes.npz")
+        if os.path.isfile(os.path.join(input_dir, "manager_values.json")):
+            os.remove(os.path.join(input_dir, "manager_values.json"))
+        for file in files_to_delete:
+            os.remove(file)
 
 
 
