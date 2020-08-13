@@ -134,7 +134,7 @@ class MarioBasicPopulationManger(PopulationManger):
 
     def breed(self, first_member, second_member):
         new_weights = []
-        cross_prob = first_member.fitness_score / sum(first_member.fitness_score, second_member.fitness_score)
+        cross_prob = first_member.fitness_score / (first_member.fitness_score + second_member.fitness_score)
         for weights1, weights2 in zip(first_member.genes, second_member.genes):
             new = copy.deepcopy(weights1)
             i = np.random.rand(*weights1.shape) > cross_prob
