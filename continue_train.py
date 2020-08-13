@@ -19,8 +19,7 @@ def write_summary(args_dict, output_data_frame: DataFrame):
         summary_file.write("Limit on no changing the x position is: {standing_limit}\n"
                            "{allow_dying} allow player to die.\n".format(standing_limit=args_dict["standing_steps_limit"],
                                                                 allow_dying="Didn't" if args_dict["allow_death"] else "Did"))
-        if args.agent == "genetic":
-            summary_file.write("Initial population is: {i_p}\n"
+        summary_file.write("Initial population is: {i_p}\n"
                                "Elite size is: {e_s}\n"
                                "pick size is {p}\n"
                                "Random members number is {r_m}\n".format(i_p=args_dict["initial_population"],
