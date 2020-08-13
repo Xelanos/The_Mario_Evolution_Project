@@ -87,10 +87,10 @@ def write_summary(args, input_args, output_data_frame: DataFrame):
                                format(standing_limit=input_args["standing_steps_limit"],
                                 allow_dying="Didn't allowed" if input_args["allow_death"] else "allowed"))
             if args.agent == "genetic":
-                summary_file.write(". {i_p} - initial population. {e_s} - Elite size. {r_p} - random pick size. "
+                summary_file.write(". {i_p} - initial population. {e_s} - Elite size. {p} - pick size. "
                                    "{r_m} - random members number".
                                    format(i_p=input_args["initial_population"], e_s=input_args["elite_size"],
-                                          r_p=input_args["pick_size"], r_m=input_args["random_members"]))
+                                          p=input_args["pick_size"], r_m=input_args["random_members"]))
         summary_file.write(".\n")
         summary_file.write("Test ran {steps_limit} steps limit.\n".format(steps_limit=args.steps_limit))
         if any(output_data_frame['finish_level']):
