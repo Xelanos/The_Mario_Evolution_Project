@@ -155,7 +155,9 @@ class MarioBasicPopulationManger(PopulationManger):
         for weights in member.genes:
             i = np.random.rand(*weights.shape) < self.mutation_power
             noise = 2 * np.random.rand(*weights.shape) - 1
-            weights[i] = noise[i]
+            weights[i] = weights[i] + noise[i]
+            weights[weights > 1] = 1
+            weights[weights < -1] = -1
             new_weights.append(weights)
         member.genes = new_weights
 
