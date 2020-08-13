@@ -17,7 +17,7 @@ AGENTS = ['human', 'genetic', "random_nn"]
 ACTION_SET = {"right_only": actions.RIGHT_ONLY, "simple": actions.SIMPLE_MOVEMENT, "complex": actions.COMPLEX_MOVEMENT}
 DEFAULT_ACTION_SET = "simple"
 TRIALS = 10
-INITIAL_POP = 150
+INITIAL_POP = 100
 ELITE_DEFAULT_SIZE = 10
 RECORDE_OPTIONS = ["none", 'some', 'all']
 DEFAULT_RECORDE_FREQUENCY = 100
@@ -25,7 +25,7 @@ DEFAULT_RECORDE_FREQUENCY = 100
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Script to train agents.")
-    parser.add_argument("-agent", dest='agent', choices=AGENTS, default=AGENTS[0],
+    parser.add_argument("-agent", dest='agent', choices=AGENTS, default=AGENTS[1],
                         help="Chose kind of agent for training.")
     parser.add_argument("-o", "-output_dir", dest="output_dir", default="", help="Path for the output data.")
     parser.add_argument("-n", "-num_of_trials", "-g", "-generations", dest='loop_times', type=int, default=TRIALS,
