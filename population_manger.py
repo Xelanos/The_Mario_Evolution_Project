@@ -42,6 +42,7 @@ class PopulationManger():
 
     def __init__(self, population_size):
         self.population = []
+        self.initial_size = population_size
         self.size = population_size
         self.gen_number = 0
 
@@ -108,11 +109,15 @@ class MarioBasicPopulationManger(PopulationManger):
         print(f'Best fitness : {elite[0].fitness_score}')
         parents = [self.pick_from_population() for _ in range(self.pick_size)]
         parents = sorted(set(elite + parents), key=lambda member: member.fitness_score, reverse=True)
+        parents_combinations = list(combinations(parents, 2))
+        max_children = self.initial_size * ((self.gen_number + 2) ** 2)  # prevent exponential grow
+        if len(parents_combinations) > max_children:
+            parents_combinations = np.random.choice(parents_combinations, size=max_children, replace=False)
         self.population = parents
         self.size = len(self.population)
         self.mutation_rate -= (0.0006 * self.gen_number)
         index = 0
-        for parent1, parent2 in combinations(parents, 2):
+        for parent1, parent2 in parents_combinations:
             new_member = self.breed(parent1, parent2)
             new_member.set_name("member_{index}_gen_{gen_index}".format(index=index, gen_index=self.gen_number))
             self.add_member(new_member)
@@ -166,6 +171,7 @@ class MarioBasicPopulationManger(PopulationManger):
         manager_values = {"gen_number": self.gen_number,
                           "num_of_actions": self.num_of_actions,
                           "population_size": self.size,
+                          "initial_size" : self.initial_size,
                           "elite_size": self.elite_size,
                           "pick_size": self.pick_size,
                           "random_members": self.random_members,
@@ -181,6 +187,7 @@ class MarioBasicPopulationManger(PopulationManger):
             manager_values = json.load(f)
             self.gen_number = manager_values["gen_number"]
             self.size = manager_values["population_size"]
+            self.initial_size = manager_values["initial_size"]
             self.num_of_actions = manager_values["num_of_actions"]
             self.elite_size = manager_values["elite_size"]
             self.pick_size = manager_values["pick_size"]
