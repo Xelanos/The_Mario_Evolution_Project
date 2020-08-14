@@ -5,7 +5,7 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym import Wrapper
 import gym.wrappers.monitor as monitor
-from wrappers import WarpFrame
+from wrappers import *
 import human_playing
 import time
 from population_manger import MarioBasicPopulationManger
@@ -17,6 +17,7 @@ from train import ACTION_SET
 AGENTS = ['human', 'genetic', "random_nn"]
 DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
 DEFAULT_STEP_LIMIT = 2000
+standing_steps_limit = 300
 
 
 def parse_arguments():
@@ -125,6 +126,9 @@ def run_agent(player: MarioPlayer, env: Wrapper, record: bool, vids_path: str, i
     state = env.reset()
     done = False
 
+    last_x_pos = 0
+    same_x_pos_cunt = 0
+
     for step in range(steps_limit):
         if done:
             break
@@ -135,6 +139,14 @@ def run_agent(player: MarioPlayer, env: Wrapper, record: bool, vids_path: str, i
             rec.capture_frame()
         player.update_info(info)
         player.update_reward(reward)
+
+        if last_x_pos == info['x_pos']:
+            same_x_pos_cunt += 1
+        else:
+            same_x_pos_cunt = 0
+            last_x_pos = info['x_pos']
+        if same_x_pos_cunt > standing_steps_limit:  # end the run if player don't advance:
+            done = True
         if info['flag_get']:  # if got to the flag - run is ended.
             done = True
 
@@ -194,6 +206,7 @@ if __name__ == "__main__":
         elite = population_manager.get_elite()
         env = JoypadSpace(env, actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
         outcomes = []
         print("Stating genetic agent test:")
         t = time.time()
@@ -210,6 +223,7 @@ if __name__ == "__main__":
         actions = ACTION_SET[input_args['action_set']]
         env = JoypadSpace(env, actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
         df = read_csv(os.path.join(args.input_dir, "random_output.csv"))
         best_result_index = df['performance_score'].idxmax()
         player = MarioPlayer(len(actions))

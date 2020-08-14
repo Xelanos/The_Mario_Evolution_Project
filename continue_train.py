@@ -5,7 +5,7 @@ from pandas import DataFrame
 from mario_evolution import GeneticMario
 
 INPUT_DIR = "train_output_genetic_13-08_22-09"
-INPUT_DIR_LAST_GEN = "train_output_genetic_13-08_22-09\gen_1"
+INPUT_DIR_LAST_GEN = "train_output_genetic_13-08_22-09\gen_18"
 OUTPUT_DIR = "train_output_genetic_13-08_22-09"
 RENDER_F = 0
 

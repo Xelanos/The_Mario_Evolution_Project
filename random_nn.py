@@ -1,7 +1,7 @@
 import os
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
-from wrappers import WarpFrame
+from wrappers import *
 import gym.wrappers.monitor as monitor
 import time
 from pandas import DataFrame
@@ -58,6 +58,7 @@ class RandomMarioPlayer:
         env = gym_super_mario_bros.make(self.env)
         env = JoypadSpace(env, self.actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
 
         if self.record:
             rec_output_path = os.path.join(self.record_dir, "{name}.mp4".
