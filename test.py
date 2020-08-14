@@ -5,7 +5,7 @@ import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym import Wrapper
 import gym.wrappers.monitor as monitor
-from wrappers import WarpFrame
+from wrappers import *
 import human_playing
 import time
 from population_manger import MarioBasicPopulationManger
@@ -194,6 +194,7 @@ if __name__ == "__main__":
         elite = population_manager.get_elite()
         env = JoypadSpace(env, actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
         outcomes = []
         print("Stating genetic agent test:")
         t = time.time()
@@ -210,6 +211,7 @@ if __name__ == "__main__":
         actions = ACTION_SET[input_args['action_set']]
         env = JoypadSpace(env, actions)
         env = WarpFrame(env)
+        env = FrameStack(env, 4)
         df = read_csv(os.path.join(args.input_dir, "random_output.csv"))
         best_result_index = df['performance_score'].idxmax()
         player = MarioPlayer(len(actions))
