@@ -110,7 +110,7 @@ class MarioBasicPopulationManger(PopulationManger):
         parents = [self.pick_from_population() for _ in range(self.pick_size)]
         parents = sorted(set(elite + parents), key=lambda member: member.fitness_score, reverse=True)
         parents_combinations = list(combinations(parents, 2))
-        max_children = self.initial_size * ((self.gen_number + 2) ** 2)  # prevent exponential grow
+        max_children = self.initial_size  # prevent grow
         if len(parents_combinations) > max_children:
             parents_combinations = np.random.choice(parents_combinations, size=max_children, replace=False)
         self.population = parents
