@@ -20,7 +20,7 @@ class MarioPlayer:
     FITNESS_WEIGHTS = np.array([1,  # avg_reward
                                 0,  # score
                                 100,  # did_win
-                                -100  # died
+                                0  # died
                                 ])
 
     def __init__(self, number_of_actions, weights=None):
