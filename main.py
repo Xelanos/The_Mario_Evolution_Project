@@ -11,7 +11,6 @@ INITIAL_POP = 101
 ELITE_DEFAULT_SIZE = 10
 GENERATIONS = 201
 TIME_SCALE = 2000
-DEFAULT_ENVIRONMENT = 'SuperMarioBros-v0'
 
 
 
@@ -28,9 +27,14 @@ if __name__ == '__main__':
         best_wieghts.append(loded[f'arr_{i}'])
 
 
-    g = GeneticMario(DEFAULT_ENVIRONMENT, actions, GENERATIONS, INITIAL_POP, ELITE_DEFAULT_SIZE)
-    best_player = Member(best_wieghts)
-    g.run_player(best_player)
-    g.run(render_every=20)
+    genetic_1_1 = GeneticMario('SuperMarioBros-1-1-v0', actions, GENERATIONS, INITIAL_POP, ELITE_DEFAULT_SIZE)
+    best_player = Member(best_wieghts, name="Best1-1")
+    genetic_1_1.render = True
+    genetic_1_1.run_player(best_player)
+    
+    genetic_3_2 = GeneticMario('SuperMarioBros-3-2-v0', actions, GENERATIONS, INITIAL_POP, ELITE_DEFAULT_SIZE)
+    best_player = Member(best_wieghts, name="Best3-2")
+    genetic_3_2.render = True
+    genetic_3_2.run_player(best_player)
 
 
