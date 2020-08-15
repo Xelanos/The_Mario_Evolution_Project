@@ -21,8 +21,11 @@ def write_summary(args_dict, output_data_frame: DataFrame):
                                                                 allow_dying="Didn't" if args_dict["allow_death"] else "Did"))
         summary_file.write("Initial population is: {i_p}\n"
                                "Elite size is: {e_s}\n"
-                               "Random pick size is {r_p}".format(i_p=args_dict["initial_population"], e_s=args_dict["elite_size"],
-                                                                  r_p=args_dict["random_pick_size"]))
+                               "pick size is {p}\n"
+                               "Random members number is {r_m}\n".format(i_p=args_dict["initial_population"],
+                                                                         e_s=args_dict["elite_size"],
+                                                                         p=args_dict["pick_size"],
+                                                                         r_m=args_dict["random_members"]))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -40,6 +43,7 @@ def write_summary(args_dict, output_data_frame: DataFrame):
         summary_file.write("Finish in {steps} steps and {deaths} deaths. Score {score} and {coins} coins.\n".format(
             steps=info['steps'], deaths=info['deaths'], score=info['score'], coins=info['coins']))
 
+
 if __name__ == "__main__":
     with open(os.path.join(INPUT_DIR, "train_arguments.json"), "r") as arguments_file:
         args_dict = json.load(arguments_file)
@@ -48,7 +52,7 @@ if __name__ == "__main__":
                          generations=args_dict['num_of_loops'],
                          initial_pop=args_dict["initial_population"],
                          elite_size=args_dict["elite_size"],
-                         random_pick_size=args_dict["random_pick_size"],
+                         pick_size=args_dict["pick_size"],
                          steps_scale=args_dict["steps_limit"],
                          allow_death=args_dict["allow_death"],
                          standing_steps_limit=args_dict["standing_steps_limit"],

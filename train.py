@@ -18,7 +18,8 @@ ACTION_SET = {"right_only": actions.RIGHT_ONLY, "simple": actions.SIMPLE_MOVEMEN
 DEFAULT_ACTION_SET = "simple"
 TRIALS = 10
 INITIAL_POP = 100
-ELITE_DEFAULT_SIZE = 10
+PICK_DEFAULT_SIZE = 10
+ELITE_DEFAULT_SIZE = 5
 RECORDE_OPTIONS = ["none", 'some', 'all']
 DEFAULT_RECORDE_FREQUENCY = 100
 
@@ -33,10 +34,10 @@ def parse_arguments():
     parser.add_argument("-initial_population", "-i_p", dest="initial_population", type=int, default=INITIAL_POP,
                         help="For genetic agent, the size of initial population for genetic agent.")
     parser.add_argument("-elite_size", "-e_s", dest="elite_size", type=int, default=ELITE_DEFAULT_SIZE,
-                        help="For genetic agent, the size of the elite to breed for the next generation.")
-    parser.add_argument("-random_pick_size", "-random_parents", "-random_pick", "-r_p", dest="random_pick_size",
-                        type=int, default=0, help="For genetic agent, the number of members who will randomly picked to"
-                                                  " breed for the next generation.")
+                        help="For genetic agent, the size of the elite to breed and to keep for the next generation.")
+    parser.add_argument("-pick_size", "-picked_parents", "-pick", "-p", dest="pick_size", type=int,
+                        default=PICK_DEFAULT_SIZE, help="For genetic agent, the number of members who will picked to "
+                                                        "breed and keep for the next generation.")
     parser.add_argument("-random_members", "-r_m", dest="random_members", default=0, type=int, help="For genetic agent,"
                         " the number of members with random weights that will be added every generation.")
     parser.add_argument("-s", '-time_scale', "-steps_scale", dest='steps_limit', default=DEFAULT_STEP_LIMIT, type=int,
@@ -66,7 +67,7 @@ def parse_arguments():
         parser.error("Initial population size have to be positive.")
     if args.elite_size < 2 or args.elite_size > args.initial_population:
         parser.error("Elite size is smaller then 2 or bigger then the population size.")
-    if args.random_pick_size < 0:
+    if args.pick_size < 0:
         parser.error("Random pick size must to be positive.")
     if args.random_members < 0:
         parser.error("Random members number must to be positive.")
@@ -93,7 +94,7 @@ def save_args_file(args):
                      "num_of_loops": args.loop_times,
                      "initial_population": args.initial_population,
                      "elite_size": args.elite_size,
-                     "random_pick_size": args.random_pick_size,
+                     "pick_size": args.pick_size,
                      "random_members": args.random_members,
                      "steps_limit": args.steps_limit,
                      "action_set": args.action_set,
@@ -118,11 +119,11 @@ def write_summary(args, output_data_frame: DataFrame):
         if args.agent == "genetic":
             summary_file.write("Initial population is: {i_p}\n"
                                "Elite size is: {e_s}\n"
-                               "Random pick size is {r_p}\n"
+                               "pick size is {p}\n"
                                "Random members number is {r_m}\n".format(i_p=args.initial_population,
-                                                                e_s=args.elite_size,
-                                                                r_p=args.random_pick_size,
-                                                                r_m=args.random_members))
+                                                                         e_s=args.elite_size,
+                                                                         p=args.pick_size,
+                                                                         r_m=args.random_members))
         if any(output_data_frame['finish_level']):
             summary_file.write("Agent successfully win the level in some games.\n")
         else:
@@ -180,7 +181,7 @@ if __name__ == "__main__":
                              generations=args.loop_times,
                              initial_pop=args.initial_population,
                              elite_size=args.elite_size,
-                             random_pick_size=args.random_pick_size,
+                             pick_size=args.pick_size,
                              random_members=args.random_members,
                              steps_scale=args.steps_limit,
                              allow_death=args.allow_dying,
