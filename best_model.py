@@ -7,7 +7,7 @@ from population_manger import Member
 import numpy as np
 
 
-INITIAL_POP = 101
+INITIAL_POP = 102
 ELITE_DEFAULT_SIZE = 10
 GENERATIONS = 201
 TIME_SCALE = 2000
